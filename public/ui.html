@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fitzer - Your Fitness Journey</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --accent-color: #3b82f6;
+        }
+        
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent-color);
+            border-radius: 4px;
+        }
+        
+        /* Dark mode styles */
+        .dark {
+            background-color: #111827;
+            color: #e5e7eb;
+        }
+        
+        .dark .bg-white {
+            background-color: #1f2937 !important;
+        }
+        
+        .dark .text-gray-800 {
+            color: #e5e7eb !important;
+        }
+        
+        .dark .text-gray-600 {
+            color: #d1d5db !important;
+        }
+        
+        .dark .text-gray-700 {
+            color: #e5e7eb !important;
+        }
+        
+        .dark .bg-gray-50 {
+            background-color: #111827 !important;
+        }
+        
+        .dark .bg-gray-100 {
+            background-color: #1f2937 !important;
+        }
+        
+        .dark .border-gray-200 {
+            border-color: #374151 !important;
+        }
+        
+        .dark .border-gray-300 {
+            border-color: #4b5563 !important;
+        }
+        
+        /* Glassmorphism header */
+        .glass-header {
+            backdrop-filter: blur(10px);
+            background-color: rgba(255, 255, 255, 0.7);
+            transition: all 0.3s ease;
+        }
+        
+        .dark .glass-header {
+            background-color: rgba(17, 24, 39, 0.7);
+        }
+        
+        .glass-header.scrolled {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        
+        /* Card hover effects */
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.2);
+        }
+        
+        .dark .card-hover:hover {
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+        }
+        
+        /* Glow border effect */
+        .glow-border {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .glow-border::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 0.5rem;
+            padding: 2px;
+            background: linear-gradient(45deg, var(--accent-color), transparent);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .glow-border:hover::before {
+            opacity: 1;
+        }
+        
+        /* Button press effect */
+        .btn-press {
+            transition: transform 0.1s ease;
+        }
+        
+        .btn-press:active {
+            transform: scale(0.95);
+        }
+        
+        /* Pulse animation for FAB */
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(59, 130, 246, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+            }
+        }
+        
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+        
+        /* Fade in animation */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+        
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* Counter animation */
+        @keyframes countUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .counter-animation {
+            animation: countUp 0.5s ease forwards;
+        }
+        
+        /* Chatbot styles */
+        .chat-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        
+        .chat-window {
+            position: absolute;
+            bottom: 80px;
+            right: 0;
+            width: 350px;
+            height: 450px;
+            background-color: white;
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            transform: scale(0);
+            opacity: 0;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+        
+        .dark .chat-window {
+            background-color: #1f2937;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        .chat-window.open {
+            transform: scale(1);
+            opacity: 1;
+        }
+        
+        .chat-header {
+            background-color: var(--accent-color);
+            color: white;
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .chat-body {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        
+        .chat-input-container {
+            padding: 1rem;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .dark .chat-input-container {
+            border-top-color: #374151;
+        }
+        
+        .chat-message {
+            max-width: 80%;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.75rem;
+            word-wrap: break-word;
+        }
+        
+        .bot-message {
+            background-color: #f3f4f6;
+            align-self: flex-start;
+        }
+        
+        .dark .bot-message {
+            background-color: #374151;
+        }
+        
+        .user-message {
+            background-color: var(--accent-color);
+            color: white;
+            align-self: flex-end;
+        }
+        
+        /* Exercise and diet card image overlay */
+        .card-image-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.7));
+            border-radius: 0.5rem;
+        }
+        
+        /* Theme toggle animation */
+        .theme-toggle {
+            transition: transform 0.3s ease;
+        }
+        
+        .theme-toggle:hover {
+            transform: rotate(180deg);
+        }
+        
+        /* Favicon styles */
+        .favicon {
+            width: 32px;
+            height: 32px;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 transition-colors duration-300">
+    <!-- Header -->
+    <header id="header" class="glass-header fixed top-0 left-0 right-0 z-50 transition-all duration-300">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <div class="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
+                    <!-- Custom SVG icon based on the provided image -->
+                    <img src="https://camo.githubusercontent.com/695d0e6dfb8812406ddb2fb2ead19612c219d729574a5c08de66ac1a771bd76f/68747470733a2f2f63646e2e657865726369736564622e6465762f657865726369736564622f616e64726f69642d6368726f6d652d353132783531322e706e67"/>
+                </div>
+                <h1 class="text-2xl font-bold">Fitzer</h1>
+            </div>
+            
+            <nav class="hidden md:flex space-x-8">
+                <a href="#home" class="hover:text-blue-500 transition-colors duration-200">Home</a>
+                <a href="#exercises" class="hover:text-blue-500 transition-colors duration-200">Exercises</a>
+                <a href="#diet-plans" class="hover:text-blue-500 transition-colors duration-200">Diet Plans</a>
+            </nav>
+            
+            <button id="theme-toggle" class="theme-toggle p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200">
+                <i class="fas fa-sun text-yellow-500 dark:hidden"></i>
+                <i class="fas fa-moon text-blue-300 hidden dark:block"></i>
+            </button>
+        </div>
+    </header>
+    
+    <!-- Main Content -->
+    <main class="pt-20">
+        <!-- Home Section -->
+        <section id="home" class="min-h-screen flex flex-col justify-center items-center px-4 py-12 fade-in">
+            <div class="container mx-auto max-w-6xl">
+                <div class="text-center mb-12">
+                    <h2 class="text-4xl md:text-5xl font-bold mb-4">Welcome back, Fitzer! Ready to Crush Your Goals?</h2>
+                    <p class="text-lg text-gray-600 dark:text-gray-400">Track your progress, discover new workouts, and fuel your body with the right nutrition.</p>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+                    <div class="card-hover bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
+                                <i class="fas fa-fire text-blue-500"></i>
+                            </div>
+                            <span class="text-sm text-gray-500 dark:text-gray-400">This Week</span>
+                        </div>
+                        <h3 class="text-3xl font-bold mb-1"><span class="counter" data-target="7">0</span></h3>
+                        <p class="text-gray-600 dark:text-gray-400">Workout Streak</p>
+                    </div>
+                    
+                    <div class="card-hover bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-12 h-12 bg-orange-100 dark:bg-orange-900 rounded-full flex items-center justify-center">
+                                <i class="fas fa-burn text-orange-500"></i>
+                            </div>
+                            <span class="text-sm text-gray-500 dark:text-gray-400">Today</span>
+                        </div>
+                        <h3 class="text-3xl font-bold mb-1"><span class="counter" data-target="520">0</span></h3>
+                        <p class="text-gray-600 dark:text-gray-400">Calories Burned</p>
+                    </div>
+                    
+                    <div class="card-hover bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
+                                <i class="fas fa-clock text-green-500"></i>
+                            </div>
+                            <span class="text-sm text-gray-500 dark:text-gray-400">Today</span>
+                        </div>
+                        <h3 class="text-3xl font-bold mb-1"><span class="counter" data-target="45">0</span></h3>
+                        <p class="text-gray-600 dark:text-gray-400">Active Minutes</p>
+                    </div>
+                </div>
+                
+                <div class="text-center">
+                    <a href="#exercises" class="btn-press inline-block bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-8 rounded-full transition-colors duration-200">
+                        Start Your Workout
+                    </a>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Exercises Section -->
+        <section id="exercises" class="py-16 px-4 fade-in">
+            <div class="container mx-auto max-w-6xl">
+                <h2 class="text-3xl md:text-4xl font-bold text-center mb-12">Choose Your Workout</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="card-hover glow-border relative h-64 rounded-xl overflow-hidden cursor-pointer">
+                        <img src="https://picsum.photos/seed/hiit/400/300.jpg" alt="HIIT" class="w-full h-full object-cover">
+                        <div class="card-image-overlay"></div>
+                        <div class="absolute bottom-0 left-0 right-0 p-6 text-white">
+                            <h3 class="text-2xl font-bold mb-2">HIIT</h3>
+                            <div class="flex items-center space-x-4 text-sm">
+                                <span><i class="fas fa-clock mr-1"></i> 30 min</span>
+                                <span><i class="fas fa-fire mr-1"></i> High</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card-hover glow-border relative h-64 rounded-xl overflow-hidden cursor-pointer">
+                        <img src="https://picsum.photos/seed/strength/400/300.jpg" alt="Strength" class="w-full h-full object-cover">
+                        <div class="card-image-overlay"></div>
+                        <div class="absolute bottom-0 left-0 right-0 p-6 text-white">
+                            <h3 class="text-2xl font-bold mb-2">Strength</h3>
+                            <div class="flex items-center space-x-4 text-sm">
+                                <span><i class="fas fa-clock mr-1"></i> 45 min</span>
+                                <span><i class="fas fa-fire mr-1"></i> Medium</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card-hover glow-border relative h-64 rounded-xl overflow-hidden cursor-pointer">
+                        <img src="https://picsum.photos/seed/yoga/400/300.jpg" alt="Yoga" class="w-full h-full object-cover">
+                        <div class="card-image-overlay"></div>
+                        <div class="absolute bottom-0 left-0 right-0 p-6 text-white">
+                            <h3 class="text-2xl font-bold mb-2">Yoga</h3>
+                            <div class="flex items-center space-x-4 text-sm">
+                                <span><i class="fas fa-clock mr-1"></i> 60 min</span>
+                                <span><i class="fas fa-fire mr-1"></i> Low</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card-hover glow-border relative h-64 rounded-xl overflow-hidden cursor-pointer">
+                        <img src="https://picsum.photos/seed/cardio/400/300.jpg" alt="Cardio" class="w-full h-full object-cover">
+                        <div class="card-image-overlay"></div>
+                        <div class="absolute bottom-0 left-0 right-0 p-6 text-white">
+                            <h3 class="text-2xl font-bold mb-2">Cardio</h3>
+                            <div class="flex items-center space-x-4 text-sm">
+                                <span><i class="fas fa-clock mr-1"></i> 40 min</span>
+                                <span><i class="fas fa-fire mr-1"></i> Medium</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card-hover glow-border relative h-64 rounded-xl overflow-hidden cursor-pointer">
+                        <img src="https://picsum.photos/seed/pilates/400/300.jpg" alt="Pilates" class="w-full h-full object-cover">
+                        <div class="card-image-overlay"></div>
+                        <div class="absolute bottom-0 left-0 right-0 p-6 text-white">
+                            <h3 class="text-2xl font-bold mb-2">Pilates</h3>
+                            <div class="flex items-center space-x-4 text-sm">
+                                <span><i class="fas fa-clock mr-1"></i> 50 min</span>
+                                <span><i class="fas fa-fire mr-1"></i> Low</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card-hover glow-border relative h-64 rounded-xl overflow-hidden cursor-pointer">
+                        <img src="https://picsum.photos/seed/crossfit/400/300.jpg" alt="CrossFit" class="w-full h-full object-cover">
+                        <div class="card-image-overlay"></div>
+                        <div class="absolute bottom-0 left-0 right-0 p-6 text-white">
+                            <h3 class="text-2xl font-bold mb-2">CrossFit</h3>
+                            <div class="flex items-center space-x-4 text-sm">
+                                <span><i class="fas fa-clock mr-1"></i> 35 min</span>
+                                <span><i class="fas fa-fire mr-1"></i> High</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Diet Plans Section -->
+        <section id="diet-plans" class="py-16 px-4 bg-gray-100 dark:bg-gray-800 fade-in">
+            <div class="container mx-auto max-w-6xl">
+                <h2 class="text-3xl md:text-4xl font-bold text-center mb-12">Fuel Your Body</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="card-hover glow-border bg-white dark:bg-gray-700 rounded-xl overflow-hidden">
+                        <img src="https://picsum.photos/seed/balanced/400/250.jpg" alt="Balanced Boost" class="w-full h-48 object-cover">
+                        <div class="p-6">
+                            <h3 class="text-xl font-bold mb-2">Balanced Boost</h3>
+                            <p class="text-gray-600 dark:text-gray-400 mb-4">A well-rounded meal plan with the perfect mix of proteins, carbs, and fats to keep you energized throughout the day.</p>
+                            <button class="btn-press bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200">
+                                View Plan
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="card-hover glow-border bg-white dark:bg-gray-700 rounded-xl overflow-hidden">
+                        <img src="https://picsum.photos/seed/keto/400/250.jpg" alt="Keto Cut" class="w-full h-48 object-cover">
+                        <div class="p-6">
+                            <h3 class="text-xl font-bold mb-2">Keto Cut</h3>
+                            <p class="text-gray-600 dark:text-gray-400 mb-4">Low-carb, high-fat diet designed to put your body into ketosis for efficient fat burning and rapid weight loss.</p>
+                            <button class="btn-press bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200">
+                                View Plan
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="card-hover glow-border bg-white dark:bg-gray-700 rounded-xl overflow-hidden">
+                        <img src="https://picsum.photos/seed/vegan/400/250.jpg" alt="Vegan Vitality" class="w-full h-48 object-cover">
+                        <div class="p-6">
+                            <h3 class="text-xl font-bold mb-2">Vegan Vitality</h3>
+                            <p class="text-gray-600 dark:text-gray-400 mb-4">Plant-based nutrition plan packed with all the essential nutrients to support your fitness goals and overall health.</p>
+                            <button class="btn-press bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200">
+                                View Plan
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="card-hover glow-border bg-white dark:bg-gray-700 rounded-xl overflow-hidden">
+                        <img src="https://picsum.photos/seed/paleo/400/250.jpg" alt="Paleo Power" class="w-full h-48 object-cover">
+                        <div class="p-6">
+                            <h3 class="text-xl font-bold mb-2">Paleo Power</h3>
+                            <p class="text-gray-600 dark:text-gray-400 mb-4">Eat like our ancestors with whole foods, lean proteins, and natural fats to optimize your performance and recovery.</p>
+                            <button class="btn-press bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200">
+                                View Plan
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="card-hover glow-border bg-white dark:bg-gray-700 rounded-xl overflow-hidden">
+                        <img src="https://picsum.photos/seed/muscle/400/250.jpg" alt="Muscle Builder" class="w-full h-48 object-cover">
+                        <div class="p-6">
+                            <h3 class="text-xl font-bold mb-2">Muscle Builder</h3>
+                            <p class="text-gray-600 dark:text-gray-400 mb-4">High-protein meal plan designed to support muscle growth and recovery with optimal macro distribution.</p>
+                            <button class="btn-press bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200">
+                                View Plan
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="card-hover glow-border bg-white dark:bg-gray-700 rounded-xl overflow-hidden">
+                        <img src="https://picsum.photos/seed/athlete/400/250.jpg" alt="Athlete's Edge" class="w-full h-48 object-cover">
+                        <div class="p-6">
+                            <h3 class="text-xl font-bold mb-2">Athlete's Edge</h3>
+                            <p class="text-gray-600 dark:text-gray-400 mb-4">Performance-focused nutrition plan with strategic carb loading and recovery protocols for serious athletes.</p>
+                            <button class="btn-press bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200">
+                                View Plan
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <!-- Floating Chatbot -->
+    <div class="chat-container">
+        <button id="chat-toggle" class="pulse-animation w-14 h-14 bg-blue-500 hover:bg-blue-600 text-white rounded-full flex items-center justify-center shadow-lg transition-colors duration-200">
+            <i class="fas fa-comments text-xl"></i>
+        </button>
+        
+        <div id="chat-window" class="chat-window">
+            <div class="chat-header">
+                <h3 class="font-semibold">Fitzer Assistant</h3>
+                <button id="chat-close" class="text-white hover:text-gray-200 transition-colors">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="chat-body" id="chat-body">
+                <div class="chat-message bot-message">
+                    Hi there! I'm your Fitzer assistant. How can I help you with your fitness journey today?
+                </div>
+            </div>
+            
+            <div class="chat-input-container">
+                <input type="text" id="chat-input" placeholder="Type your message..." class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <button id="chat-send" class="btn-press bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors duration-200">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Theme Toggle
+        const themeToggle = document.getElementById('theme-toggle');
+        const html = document.documentElement;
+        
+        // Check for saved theme preference or default to light
+        const currentTheme = localStorage.getItem('theme') || 'light';
+        if (currentTheme === 'dark') {
+            html.classList.add('dark');
+        }
+        
+        themeToggle.addEventListener('click', () => {
+            html.classList.toggle('dark');
+            const theme = html.classList.contains('dark') ? 'dark' : 'light';
+            localStorage.setItem('theme', theme);
+        });
+        
+        // Header scroll effect
+        const header = document.getElementById('header');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        });
+        
+        // Counter Animation
+        const counters = document.querySelectorAll('.counter');
+        const speed = 200;
+        
+        const countUp = () => {
+            counters.forEach(counter => {
+                const target = +counter.getAttribute('data-target');
+                const count = +counter.innerText;
+                const increment = target / speed;
+                
+                if (count < target) {
+                    counter.innerText = Math.ceil(count + increment);
+                    setTimeout(countUp, 10);
+                } else {
+                    counter.innerText = target;
+                }
+            });
+        };
+        
+        // Intersection Observer for fade-in animations
+        const fadeElements = document.querySelectorAll('.fade-in');
+        
+        const fadeInOnScroll = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    
+                    // Start counter animation when home section is visible
+                    if (entry.target.id === 'home') {
+                        countUp();
+                    }
+                    
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, {
+            threshold: 0.1
+        });
+        
+        fadeElements.forEach(element => {
+            fadeInOnScroll.observe(element);
+        });
+        
+        // Chatbot functionality
+        const chatToggle = document.getElementById('chat-toggle');
+        const chatWindow = document.getElementById('chat-window');
+        const chatClose = document.getElementById('chat-close');
+        const chatInput = document.getElementById('chat-input');
+        const chatSend = document.getElementById('chat-send');
+        const chatBody = document.getElementById('chat-body');
+        
+        chatToggle.addEventListener('click', () => {
+            chatWindow.classList.toggle('open');
+        });
+        
+        chatClose.addEventListener('click', () => {
+            chatWindow.classList.remove('open');
+        });
+        
+        const sendMessage = () => {
+            const message = chatInput.value.trim();
+            if (message) {
+                // Add user message
+                const userMessage = document.createElement('div');
+                userMessage.className = 'chat-message user-message';
+                userMessage.textContent = message;
+                chatBody.appendChild(userMessage);
+                
+                // Clear input
+                chatInput.value = '';
+                
+                // Simulate bot response
+                setTimeout(() => {
+                    const botMessage = document.createElement('div');
+                    botMessage.className = 'chat-message bot-message';
+                    
+                    // Simple response logic
+                    let response = "Thanks for your message! ";
+                    if (message.toLowerCase().includes('workout')) {
+                        response += "I recommend checking out our exercise section for a variety of workouts tailored to your fitness level.";
+                    } else if (message.toLowerCase().includes('diet') || message.toLowerCase().includes('nutrition')) {
+                        response += "Our diet plans section offers various nutrition plans to support your fitness goals.";
+                    } else if (message.toLowerCase().includes('help')) {
+                        response += "I'm here to help! You can ask me about workouts, diet plans, or general fitness advice.";
+                    } else {
+                        response += "Is there anything specific about workouts or nutrition you'd like to know?";
+                    }
+                    
+                    botMessage.textContent = response;
+                    chatBody.appendChild(botMessage);
+                    
+                    // Scroll to bottom
+                    chatBody.scrollTop = chatBody.scrollHeight;
+                }, 1000);
+                
+                // Scroll to bottom
+                chatBody.scrollTop = chatBody.scrollHeight;
+            }
+        };
+        
+        chatSend.addEventListener('click', sendMessage);
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+        
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

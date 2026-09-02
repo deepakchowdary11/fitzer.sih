@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="en">       
+<head>    
+  <meta charset="utf-8" />
+  <title>AI Fitness Assistant — Web</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    :root{--accent:#00a3e0;--bg:#0f1720;--card:#0b1220;color:#e6eef6}
+    body{margin:0;background:linear-gradient(180deg,#071021 0%, #0b1220 100%);font-family:Inter,Segoe UI,Roboto,system-ui,Arial;color:var(--card);display:flex;gap:18px;min-height:100vh;align-items:flex-start;padding:24px;box-sizing:border-box;}
+    .panel{width:360px;background:rgba(255,255,255,0.03);border-radius:12px;padding:18px;box-shadow:0 8px 30px rgba(2,6,23,0.6)}
+    h1{margin:0 0 12px;font-size:20px;color:#fff}
+    label{display:block;font-size:13px;margin-top:12px;color:#cfe7ff}
+    input, select, button{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:#e6eef6;box-sizing:border-box;font-size:14px}
+    button{cursor:pointer;background:var(--accent);border:none;color:#fff;font-weight:600;margin-top:12px}
+    .small{font-size:13px;color:#9fbddc;margin-top:8px}
+    .status{margin-top:10px;padding:10px;border-radius:8px;background:rgba(255,255,255,0.02);font-size:14px}
+    .video-wrap{position:relative;flex:1;min-height:520px;display:flex;align-items:center;justify-content:center}
+    video{border-radius:12px;max-width:100%;transform:scaleX(-1);display:block;}
+    canvas{position:absolute;left:0;top:0;pointer-events:none;border-radius:12px;transform:scaleX(-1);}
+    .overlay-info{position:absolute;left:12px;top:12px;background:rgba(0,0,0,0.35);padding:8px 10px;border-radius:8px;color:#e7f7ff;font-weight:600}
+    .green{color:#9be89b}.red{color:#ff7b7b}
+    footer{position:fixed;right:22px;bottom:18px;color:#8aa8c4;font-size:13px}
+    .muted{color:#9fbddc;font-size:13px;margin-top:6px}
+  </style>   
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <meta http-equiv="origin-trial" content="">
+  <!-- Note: Must be served from https:// or http://localhost for camera access -->
+  <meta http-equiv="Permissions-Policy" content="camera=(self)">
+  <meta http-equiv="Referrer-Policy" content="no-referrer">
+</head>
+<body>    
+  <div class="panel">
+    <h1>AI Fitness Assistant (web)</h1>
+
+    <label>Height (m)</label>
+    <input id="height" type="number" step="0.01" placeholder="e.g. 1.75" value="1.75">
+
+    <label>Weight (kg)</label>
+    <input id="weight" type="number" step="0.1" placeholder="e.g. 68" value="68">
+
+    <label>Exercise</label>
+    <select id="exercise">
+      <option>Bicep Curl</option>
+      <option>Squats</option>
+      <option>Plank</option>
+      <option>Yoga</option>
+    </select>
+
+    <button id="startBtn">Start Exercise</button>
+    <button id="stopBtn" style="background:#222;margin-top:8px">Stop</button>
+
+    <div class="status" id="status">Status: Idle</div>
+    <div class="muted" id="recommend">Recommended: —</div>
+    <div class="muted" id="countDisplay">Count: 0</div>
+    <div class="muted" id="postureDisplay">Posture: —</div>
+    <div class="muted">Controls: press Start → allow camera → follow voice prompts.</div>
+  </div>
+
+  <div class="video-wrap" id="videoBox">
+    <video id="video" playsinline muted></video>
+    <canvas id="overlay"></canvas>
+    <div class="overlay-info" id="overlayInfo">Exercise: — | BMI: —</div>
+  </div>
+
+  <footer>Built with MediaPipe + Web Speech API</footer>
+
+  <script type="module">
+    import {Pose, POSE_CONNECTIONS} from 'https://cdn.jsdelivr.net/npm/@mediapipe/pose@0.5.1646428010/pose.js';
+    import {drawConnectors, drawLandmarks} from 'https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils@0.4.1646428010/drawing_utils.js';
+    import {Camera} from 'https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.2.1646428010/camera_utils.js';
+
+    // ---------- DOM ----------
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('overlay');
+    const ctx = canvas.getContext('2d');
+    const startBtn = document.getElementById('startBtn');
+    const stopBtn = document.getElementById('stopBtn');
+    const heightInput = document.getElementById('height');
+    const weightInput = document.getElementById('weight');
+    const exerciseSelect = document.getElementById('exercise');
+    const status = document.getElementById('status');
+    const recommend = document.getElementById('recommend');
+    const overlayInfo = document.getElementById('overlayInfo');
+    const countDisplay = document.getElementById('countDisplay');
+    const postureDisplay = document.getElementById('postureDisplay');
+
+    // ---------- State ----------
+    let camera = null;
+    let pose = null;
+    let running = false;
+    let selectedExercise = 'Bicep Curl';
+    let count = 0;
+    let stage = null;
+    let lastPostureCorrect = false;
+    let lastRepTime = 0;
+
+    // Landmark indices (MediaPipe)
+    const LEFT_SHOULDER = 11, LEFT_ELBOW = 13, LEFT_WRIST = 15, LEFT_HIP = 23, LEFT_KNEE = 25;
+
+    // ---------- Utilities ----------
+    function speak(text){
+      try{
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang = 'en-US';
+        window.speechSynthesis.cancel();
+        window.speechSynthesis.speak(u);
+      }catch(e){
+        console.warn('Speech failed', e);
+      }
+    }
+
+    function recommendExercise(bmi){
+      if(bmi < 18.5) return ["Push-ups","Plank","Bicep Curl"];
+      if(bmi < 25) return ["Squats","Lunges","Plank","Bicep Curl"];
+      return ["Walking","Stretching","Yoga","Bicep Curl"];
+    }
+
+    function calculateAngle(a,b,c){
+      const ax = a.x, ay = a.y;
+      const bx = b.x, by = b.y;
+      const cx = c.x, cy = c.y;
+      const r1 = Math.atan2(cy - by, cx - bx);
+      const r2 = Math.atan2(ay - by, ax - bx);
+      let angle = Math.abs((r1 - r2) * 180.0 / Math.PI);
+      if(angle > 180) angle = 360 - angle;
+      return angle;
+    }
+
+    function normToPixel(landmark, width, height){
+      return {x: landmark.x * width, y: landmark.y * height};
+    }
+
+    function updateOverlayInfo(bmi){
+      overlayInfo.textContent = `Exercise: ${selectedExercise} | BMI: ${bmi.toFixed(1)}`;
+    }
+
+    // ---------- Pose callback ----------
+    function onResults(results){
+      if(!running) return;
+
+      const w = video.videoWidth, h = video.videoHeight;
+      if(!w || !h) return;
+      canvas.width = w; canvas.height = h;
+
+      ctx.clearRect(0,0,w,h);
+
+      if(results.poseLandmarks){
+        drawConnectors(ctx, results.poseLandmarks, POSE_CONNECTIONS, {lineWidth:2, color:'#00FFB0'});
+        drawLandmarks(ctx, results.poseLandmarks, {lineWidth:1, color:'#FF006E', radius:2});
+      }
+
+      const heightVal = parseFloat(heightInput.value) || 0;
+      const weightVal = parseFloat(weightInput.value) || 0;
+      const bmi = (heightVal>0) ? (weightVal / (heightVal*heightVal)) : 0;
+      recommend.textContent = `Recommended: ${recommendExercise(bmi).join(', ')}`;
+      updateOverlayInfo(bmi);
+
+      let correctPosture = false;
+
+      if(selectedExercise === 'Bicep Curl' && results.poseLandmarks){
+        const lm = results.poseLandmarks;
+        const s = normToPixel(lm[LEFT_SHOULDER], w, h);
+        const e = normToPixel(lm[LEFT_ELBOW], w, h);
+        const r = normToPixel(lm[LEFT_WRIST], w, h);
+        const hip = normToPixel(lm[LEFT_HIP], w, h);
+        const knee = normToPixel(lm[LEFT_KNEE], w, h);
+
+        const backAngle = calculateAngle(s, hip, knee);
+        const elbowAngle = calculateAngle(s, e, r);
+
+        if(backAngle > 160 && backAngle < 180){
+          correctPosture = true;
+          if(!lastPostureCorrect){
+            speak('Posture correct. Continue.');
+            lastPostureCorrect = true;
+          }
+        } else {
+          correctPosture = false;
+          if(lastPostureCorrect){
+            speak('Adjust your posture. Keep your back straight.');
+            lastPostureCorrect = false;
+          }
+        }
+
+        const now = performance.now();
+        if(correctPosture){
+          if(elbowAngle > 150 && stage !== 'down'){
+            stage = 'down';
+          } else if(elbowAngle < 45 && stage === 'down'){
+            if(now - lastRepTime > 800){
+              stage = 'up';
+              count += 1;
+              lastRepTime = now;
+              countDisplay.textContent = `Count: ${count}`;
+              console.log(`Rep ${count}`);
+              speak(`Repetition ${count}`);
+            }
+          }
+        }
+
+        postureDisplay.innerHTML = `Posture: ${correctPosture ? '<span class="green">✅ Correct</span>' : '<span class="red">❌ Adjust</span>'}`;
+      }
+    }
+
+    // ---------- Start & Stop ----------
+    async function start() {
+      if(running) return;
+      selectedExercise = exerciseSelect.value;
+      running = true;
+      count = 0;
+      stage = null;
+      lastPostureCorrect = false;
+      lastRepTime = 0;
+      countDisplay.textContent = 'Count: 0';
+      postureDisplay.textContent = 'Posture: —';
+      status.textContent = 'Status: Starting...';
+      speak(`Starting ${selectedExercise}. Get ready!`);
+
+      pose = new Pose({
+        locateFile: f => `https://cdn.jsdelivr.net/npm/@mediapipe/pose@0.5.1646428010/${f}`
+      });
+      pose.setOptions({
+        modelComplexity: 1,
+        smoothLandmarks: true,
+        minDetectionConfidence: 0.6,
+        minTrackingConfidence: 0.6
+      });
+      pose.onResults(onResults);
+
+      try {
+        video.setAttribute('playsinline', '');
+        video.muted = true; // ensures autoplay on some browsers
+        camera = new Camera(video, {
+          onFrame: async () => {
+            await pose.send({image: video});
+          },
+          width: 1280,
+          height: 720
+        });
+        await camera.start();
+        status.textContent = 'Status: Running';
+      } catch(err){
+        console.error(err);
+        status.textContent = 'Status: Camera error — allow camera and reload.';
+        speak('Could not open camera. Please allow camera access.');
+        running = false;
+      }
+    }
+
+    async function stop(){
+      if(!running) return;
+      running = false;
+      try{
+        if(camera) await camera.stop();
+        if(pose) pose.close();
+      }catch(e){}
+      status.textContent = 'Status: Stopped';
+      speak('Workout complete. Good job!');
+    }
+
+    // ---------- Wire UI ----------
+    startBtn.addEventListener('click', () => {
+      const h = parseFloat(heightInput.value) || 0;
+      const w = parseFloat(weightInput.value) || 0;
+      const bmi = (h>0) ? (w / (h*h)) : 0;
+      recommend.textContent = `Recommended: ${recommendExercise(bmi).join(', ')}`;
+      selectedExercise = exerciseSelect.value;
+      start();
+    });
+
+    stopBtn.addEventListener('click', stop);
+
+    window.addEventListener('beforeunload', () => {
+      try{ camera && camera.stop(); }catch(e){}
+    });
+
+    video.addEventListener('loadedmetadata', () => {
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+    });
+
+  </script>
+</body>
+</html>
+
+
