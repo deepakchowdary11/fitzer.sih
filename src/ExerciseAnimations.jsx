@@ -465,24 +465,25 @@ export function DefaultExerciseAnim() {
 
 /* ── Exercise Router Map ── */
 const ANIM_MAP = {
-  'push-ups':             PushUpAnim,
-  'diamond-push-ups':     PushUpAnim,
-  'squats':               SquatAnim,
-  'chair-squats':         SquatAnim,
-  'plank':                PlankAnim,
-  'lunges':               LungeAnim,
-  'jumping-jacks':        JumpingJacksAnim,
-  'mountain-climbers':    MountainClimberAnim,
-  'burpees':              BurpeeAnim,
-  'wall-push-ups':        WallPushUpAnim,
-  'seated-marches':       LungeAnim,
-  'standing-calf-raises': SquatAnim,
-  'arm-circles':          JumpingJacksAnim,
-  'walking-in-place':     JumpingJacksAnim,
-  'pistol-squats':        SquatAnim,
-  'handstand-push-ups':   PushUpAnim,
-  'muscle-ups':           PushUpAnim,
-  'sprint-intervals':     JumpingJacksAnim,
+  // ── 15 Approved Exercises ──
+  'bicep-curl':               PushUpAnim,
+  'squats':                   SquatAnim,
+  'push-ups':                 PushUpAnim,
+  'plank':                    PlankAnim,
+  'lunges':                   LungeAnim,
+  'shoulder-press':           PushUpAnim,
+  'glute-bridge':             PlankAnim,
+  'mountain-climbers':        MountainClimberAnim,
+  'jumping-jacks':            JumpingJacksAnim,
+  'high-knees':               JumpingJacksAnim,
+  'side-lunges':              LungeAnim,
+  'side-leg-raises':          PlankAnim,
+  'wall-sit':                 SquatAnim,
+  'standing-knee-to-elbow':   MountainClimberAnim,
+  'arm-circles':              JumpingJacksAnim,
+  // ── Legacy / fallback mappings ──
+  'wall-push-ups':            WallPushUpAnim,
+  'chair-squats':             SquatAnim,
 };
 
 export function ExerciseAnimation({ exerciseId }) {

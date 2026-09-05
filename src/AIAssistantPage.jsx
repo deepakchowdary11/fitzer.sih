@@ -70,7 +70,25 @@ Recovery and rest
 Budget-friendly meal planning
 Vegan and non-vegan diet options
 
-${bmiContext}IMPORTANT FORMATTING RULES:
+${bmiContext}CRITICAL EXERCISE RESTRICTION:
+You MUST only recommend exercises from this approved list. Do NOT suggest any exercise outside this list under any circumstances:
+1. Bicep Curl
+2. Squats
+3. Pushups
+4. Plank
+5. Lunges
+6. Shoulder Press
+7. Glute Bridge
+8. Mountain Climbers
+9. Jumping Jacks
+10. High Knees
+11. Side Lunges
+12. Side Leg Raises
+13. Wall Sit
+14. Standing Knee-to-Elbow
+15. Arm Circles
+
+IMPORTANT FORMATTING RULES:
 - NEVER use bullet points (•), asterisks (*), or dashes (-) in your responses
 - Format all information as clean, line-by-line text
 - Use simple line breaks to separate different points
@@ -93,7 +111,7 @@ Always give specific, helpful responses. If asked about medical conditions, inju
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
         body: JSON.stringify({
-          model: 'llama-3.1-8b-instant',
+          model: 'groq/compound-mini',
           messages: [{ role: 'system', content: systemPrompt }, ...conversationHistory, { role: 'user', content: trimmed }],
           temperature: 0.7,
           max_tokens: 500,

@@ -113,7 +113,176 @@ function Calculator() {
   const [isGenerating, setIsGenerating] = React.useState(false);
   const [selectedExercise, setSelectedExercise] = React.useState(null);
 
+  // ── Cloudinary video links for each approved exercise ──
+  const EXERCISE_VIDEOS = {
+    'squats':                 'https://res.cloudinary.com/uqsa1skt/video/upload/v1788424463/WhatsApp_Video_2026-09-03_at_11.54.43_1.mp4',
+    'lunges':                 'https://res.cloudinary.com/uqsa1skt/video/upload/v1788424556/WhatsApp_Video_2026-09-03_at_11.54.54.mp4',
+    'shoulder-press':         'https://res.cloudinary.com/uqsa1skt/video/upload/v1788424718/WhatsApp_Video_2026-09-03_at_12.00.52.mp4',
+    'jumping-jacks':          'https://res.cloudinary.com/uqsa1skt/video/upload/v1788424773/WhatsApp_Video_2026-09-03_at_12.15.27.mp4',
+    'mountain-climbers':      'https://res.cloudinary.com/uqsa1skt/video/upload/v1788424843/WhatsApp_Video_2026-09-03_at_12.15.44.mp4',
+    'bicep-curl':             'https://res.cloudinary.com/uqsa1skt/video/upload/v1788424943/WhatsApp_Video_2026-09-03_at_12.29.58.mp4',
+    'high-knees':             'https://res.cloudinary.com/uqsa1skt/video/upload/v1788425043/WhatsApp_Video_2026-09-03_at_12.31.45.mp4',
+    'side-lunges':            'https://res.cloudinary.com/uqsa1skt/video/upload/v1788425237/WhatsApp_Video_2026-09-03_at_12.33.35.mp4',
+    'side-leg-raises':        'https://res.cloudinary.com/uqsa1skt/video/upload/v1788425318/WhatsApp_Video_2026-09-03_at_12.40.45.mp4',
+    'wall-sit':               'https://res.cloudinary.com/uqsa1skt/video/upload/v1788425387/WhatsApp_Video_2026-09-03_at_12.42.23.mp4',
+    'standing-knee-to-elbow': 'https://res.cloudinary.com/uqsa1skt/video/upload/v1788425447/WhatsApp_Video_2026-09-03_at_12.44.21.mp4',
+    'glute-bridge':           'https://res.cloudinary.com/uqsa1skt/video/upload/v1788425513/WhatsApp_Video_2026-09-03_at_12.46.25.mp4',
+    'push-ups':               'https://res.cloudinary.com/uqsa1skt/video/upload/v1788425596/WhatsApp_Video_2026-09-03_at_12.47.58.mp4',
+    'plank':                  'https://res.cloudinary.com/uqsa1skt/video/upload/v1788425646/WhatsApp_Video_2026-09-03_at_12.50.01.mp4',
+    'arm-circles':            'https://res.cloudinary.com/uqsa1skt/video/upload/v1788425724/WhatsApp_Video_2026-09-03_at_12.52.44.mp4',
+  };
+
   const EXERCISE_INSTRUCTIONS = {
+    'bicep-curl': {
+      steps: [
+        { label: "Step 1: Grip", text: "Stand with feet shoulder-width apart, hold weights at sides with palms facing forward." },
+        { label: "Step 2: Curl Up", text: "Keeping elbows pinned at your sides, curl the weights up toward your shoulders." },
+        { label: "Step 3: Squeeze", text: "Squeeze biceps hard at the top for 1 second." },
+        { label: "Step 4: Lower", text: "Slowly lower back to start with full control." }
+      ],
+      tip: "Do not swing your torso — isolate the bicep.",
+      breath: "Exhale while curling up; Inhale while lowering down."
+    },
+    'squats': {
+      steps: [
+        { label: "Step 1: Stance", text: "Stand with feet shoulder-width apart, toes turned slightly out." },
+        { label: "Step 2: Sit Back", text: "Hinge hips back and bend knees to lower body into a deep squat." },
+        { label: "Step 3: Pause", text: "Pause when thighs are parallel to ground with chest lifted." },
+        { label: "Step 4: Drive Up", text: "Drive through heels to return forcefully to standing." }
+      ],
+      tip: "Keep knees tracking over toes; do not let them cave inward.",
+      breath: "Inhale as you lower; Exhale as you drive up."
+    },
+    'push-ups': {
+      steps: [
+        { label: "Step 1: Plank Position", text: "Place hands shoulder-width apart, feet together, forming a straight line head to heels." },
+        { label: "Step 2: Lower Body", text: "Bend elbows at 45° to lower chest smoothly until 2 inches above ground." },
+        { label: "Step 3: Bottom Pause", text: "Hold briefly without letting your hips sag or lower back arch." },
+        { label: "Step 4: Press Up", text: "Push forcefully through your palms back to full arm extension." }
+      ],
+      tip: "Keep core tight like a rigid plank from head to ankles.",
+      breath: "Inhale while lowering chest; Exhale forcefully while pushing up."
+    },
+    'plank': {
+      steps: [
+        { label: "Step 1: Forearm Base", text: "Place forearms flat on ground with elbows directly under shoulders." },
+        { label: "Step 2: Body Alignment", text: "Extend legs straight back on toes. Form a straight line head to heels." },
+        { label: "Step 3: Lock Core", text: "Squeeze abs, glutes, and quad muscles tightly together." },
+        { label: "Step 4: Hold Position", text: "Hold still without letting hips drop or arch upward." }
+      ],
+      tip: "Look at your hands to keep neck aligned with spine.",
+      breath: "Take slow, controlled breaths into stomach while holding."
+    },
+    'lunges': {
+      steps: [
+        { label: "Step 1: Stand Tall", text: "Stand upright with hands on hips and feet hip-width apart." },
+        { label: "Step 2: Step Forward", text: "Take a large stride forward with one leg and land heel first." },
+        { label: "Step 3: Bend 90°", text: "Lower hips until both front and back knees form 90° angles." },
+        { label: "Step 4: Push Back", text: "Press through front heel to step back to starting stance." }
+      ],
+      tip: "Keep front knee behind toes and torso upright.",
+      breath: "Inhale on forward step; Exhale as you push back to start."
+    },
+    'shoulder-press': {
+      steps: [
+        { label: "Step 1: Start Position", text: "Stand or sit with weights at shoulder height, elbows at 90°, palms facing forward." },
+        { label: "Step 2: Press Up", text: "Press weights straight overhead until arms are fully extended." },
+        { label: "Step 3: Lock Out", text: "Hold briefly at the top without shrugging shoulders." },
+        { label: "Step 4: Lower Back", text: "Slowly bring weights back down to shoulder height." }
+      ],
+      tip: "Keep core braced and avoid arching your lower back.",
+      breath: "Exhale while pressing up; Inhale while lowering."
+    },
+    'glute-bridge': {
+      steps: [
+        { label: "Step 1: Lie Down", text: "Lie on your back, knees bent, feet flat on floor hip-width apart." },
+        { label: "Step 2: Brace Core", text: "Tighten core and press through heels." },
+        { label: "Step 3: Lift Hips", text: "Drive hips toward ceiling until body forms a straight line from knees to shoulders." },
+        { label: "Step 4: Squeeze & Lower", text: "Squeeze glutes hard at top, then slowly lower hips back down." }
+      ],
+      tip: "Don't let your knees fall inward during the bridge.",
+      breath: "Exhale as hips rise; Inhale as they lower."
+    },
+    'mountain-climbers': {
+      steps: [
+        { label: "Step 1: High Plank", text: "Start in a push-up position with hands flat under shoulders." },
+        { label: "Step 2: Knee Drive", text: "Drive one knee rapidly in toward chest while keeping hips low." },
+        { label: "Step 3: Quick Switch", text: "Quickly switch legs, extending back while driving opposite knee." },
+        { label: "Step 4: Run Pace", text: "Continue alternating legs in a running motion." }
+      ],
+      tip: "Don't let your hips bounce up into the air.",
+      breath: "Maintain quick, steady breathing throughout the set."
+    },
+    'jumping-jacks': {
+      steps: [
+        { label: "Step 1: Start", text: "Stand tall with feet together and arms resting at your sides." },
+        { label: "Step 2: Jump Out", text: "Jump feet out sideways while raising arms overhead." },
+        { label: "Step 3: Jump In", text: "Immediately jump feet back together bringing arms down." },
+        { label: "Step 4: Continuous", text: "Repeat fluidly with light, springy footwork." }
+      ],
+      tip: "Land softly on balls of feet to absorb impact.",
+      breath: "Exhale on jump out; Inhale on jump back."
+    },
+    'high-knees': {
+      steps: [
+        { label: "Step 1: Ready Stance", text: "Stand upright with feet hip-width apart and arms at sides." },
+        { label: "Step 2: Drive Knee", text: "Lift right knee up to waist height while pumping left arm forward." },
+        { label: "Step 3: Switch", text: "Quickly switch, driving left knee up and right arm forward." },
+        { label: "Step 4: Run in Place", text: "Continue alternating at a rapid running-in-place pace." }
+      ],
+      tip: "Stay on the balls of your feet and keep a fast rhythm.",
+      breath: "Breathe rhythmically in sync with your knee drives."
+    },
+    'side-lunges': {
+      steps: [
+        { label: "Step 1: Stand Tall", text: "Stand with feet together and hands on hips." },
+        { label: "Step 2: Step Wide", text: "Take a wide step to the right, bending the right knee as you shift weight over it." },
+        { label: "Step 3: Sit Into Lunge", text: "Lower hips until right thigh is near parallel, keeping left leg straight." },
+        { label: "Step 4: Push Back", text: "Push off with right foot to return to start, then repeat on the other side." }
+      ],
+      tip: "Keep your chest tall and knee tracking over your foot.",
+      breath: "Inhale stepping out; Exhale pushing back to center."
+    },
+    'side-leg-raises': {
+      steps: [
+        { label: "Step 1: Lie on Side", text: "Lie on your side with legs stacked and body in a straight line." },
+        { label: "Step 2: Engage Core", text: "Brace your core and keep hips stacked." },
+        { label: "Step 3: Lift Leg", text: "Slowly raise the top leg to about 45° without rotating hips." },
+        { label: "Step 4: Lower Slowly", text: "Lower leg back down with full control just above the bottom leg." }
+      ],
+      tip: "Move only at the hip — do not let your torso rock.",
+      breath: "Exhale as you raise the leg; Inhale as you lower."
+    },
+    'wall-sit': {
+      steps: [
+        { label: "Step 1: Back to Wall", text: "Stand with back flat against a wall, feet shoulder-width apart and 2 feet from wall." },
+        { label: "Step 2: Slide Down", text: "Slide down the wall until thighs are parallel to the floor." },
+        { label: "Step 3: Hold Position", text: "Keep back flat, knees at 90°, and weight in heels." },
+        { label: "Step 4: Stand Up", text: "After the hold time, press through heels to slide back up." }
+      ],
+      tip: "Do not let knees go past your toes.",
+      breath: "Breathe slowly and steadily throughout the hold."
+    },
+    'standing-knee-to-elbow': {
+      steps: [
+        { label: "Step 1: Stand Tall", text: "Stand with feet hip-width apart and hands lightly behind your head." },
+        { label: "Step 2: Lift Knee", text: "Raise your right knee up toward your torso." },
+        { label: "Step 3: Crunch Across", text: "Simultaneously rotate your left elbow down to meet the right knee." },
+        { label: "Step 4: Lower & Switch", text: "Return to start and repeat on the opposite side." }
+      ],
+      tip: "Focus on twisting from the torso, not just the elbow.",
+      breath: "Exhale as you crunch; Inhale as you return to start."
+    },
+    'arm-circles': {
+      steps: [
+        { label: "Step 1: Arms Extended", text: "Stand straight with arms stretched directly to sides at shoulder height." },
+        { label: "Step 2: Forward Circles", text: "Rotate arms in small, controlled forward circular movements." },
+        { label: "Step 3: Switch Direction", text: "After half the duration, pause and reverse to backward circles." },
+        { label: "Step 4: Finish", text: "Lower arms smoothly once time completes." }
+      ],
+      tip: "Keep core engaged and avoid swinging your torso.",
+      breath: "Maintain steady continuous breathing throughout."
+    },
     'wall-push-ups': {
       steps: [
         { label: "Step 1: Stance", text: "Stand facing a wall at arm's length. Place palms flat on wall at shoulder height." },
@@ -384,38 +553,38 @@ function Calculator() {
     return areas;
   };
 
+  // ── APPROVED EXERCISE LIST (15 exercises only) ──
   const getComprehensiveExerciseDatabase = () => ({
     beginner: [
-      { id: 'wall-push-ups', name: 'Wall Push-ups', bodyPart: 'chest', target: 'upper body', calories: 40, difficulty: 'low', equipment: 'wall', duration: '10-15 min', sets: '2-3', reps: '8-12', rest: '60s', intensity: 'low', focus: ['strength'] },
-      { id: 'chair-squats', name: 'Chair-Assisted Squats', bodyPart: 'legs', target: 'lower body', calories: 60, difficulty: 'low', equipment: 'chair', duration: '10-15 min', sets: '2-3', reps: '8-10', rest: '60s', intensity: 'low', focus: ['strength'] },
-      { id: 'seated-marches', name: 'Seated Knee Marches', bodyPart: 'core', target: 'stability', calories: 30, difficulty: 'low', equipment: 'chair', duration: '5-10 min', sets: '2-3', reps: '10-15', rest: '45s', intensity: 'low', focus: ['core'] },
-      { id: 'standing-calf-raises', name: 'Standing Calf Raises', bodyPart: 'legs', target: 'lower body', calories: 35, difficulty: 'low', equipment: 'none', duration: '5-10 min', sets: '2-3', reps: '12-15', rest: '45s', intensity: 'low', focus: ['strength'] },
-      { id: 'arm-circles', name: 'Arm Circles', bodyPart: 'arms', target: 'flexibility', calories: 25, difficulty: 'low', equipment: 'none', duration: '5-10 min', sets: '2-3', reps: '10-12', rest: '30s', intensity: 'low', focus: ['flexibility'] },
-      { id: 'walking-in-place', name: 'Walking in Place', bodyPart: 'full body', target: 'cardiovascular', calories: 80, difficulty: 'low', equipment: 'none', duration: '10-15 min', sets: '1', reps: 'continuous', rest: 'none', intensity: 'low', focus: ['cardiovascular'] }
+      { id: 'arm-circles',            name: 'Arm Circles',             bodyPart: 'arms',      target: 'flexibility',     calories: 25,  difficulty: 'low',      equipment: 'none', duration: '5-10 min',  sets: '2-3', reps: '10-12', rest: '30s',    intensity: 'low',      focus: ['flexibility'] },
+      { id: 'side-leg-raises',        name: 'Side Leg Raises',         bodyPart: 'hips',      target: 'lower body',      calories: 35,  difficulty: 'low',      equipment: 'none', duration: '5-10 min',  sets: '2-3', reps: '12-15', rest: '45s',    intensity: 'low',      focus: ['strength'] },
+      { id: 'wall-sit',               name: 'Wall Sit',                bodyPart: 'legs',      target: 'lower body',      calories: 50,  difficulty: 'low',      equipment: 'wall', duration: '5-10 min',  sets: '2-3', reps: '20-40s', rest: '60s',   intensity: 'low',      focus: ['strength', 'core'] },
+      { id: 'glute-bridge',           name: 'Glute Bridge',            bodyPart: 'glutes',    target: 'lower body',      calories: 55,  difficulty: 'low',      equipment: 'none', duration: '10-15 min', sets: '2-3', reps: '12-15', rest: '60s',    intensity: 'low',      focus: ['strength'] },
+      { id: 'plank',                  name: 'Plank',                   bodyPart: 'core',      target: 'stability',       calories: 60,  difficulty: 'low',      equipment: 'none', duration: '5-10 min',  sets: '2-3', reps: '20-30s', rest: '60s',   intensity: 'low',      focus: ['core'] }
     ],
     'beginner-intermediate': [
-      { id: 'push-ups', name: 'Standard Push-ups', bodyPart: 'chest', target: 'upper body', calories: 80, difficulty: 'moderate', equipment: 'none', duration: '15-20 min', sets: '3-4', reps: '10-15', rest: '60-90s', intensity: 'moderate', focus: ['strength'] },
-      { id: 'squats', name: 'Bodyweight Squats', bodyPart: 'legs', target: 'lower body', calories: 100, difficulty: 'moderate', equipment: 'none', duration: '15-20 min', sets: '3-4', reps: '12-15', rest: '60-90s', intensity: 'moderate', focus: ['strength'] },
-      { id: 'plank', name: 'Plank Hold', bodyPart: 'core', target: 'stability', calories: 60, difficulty: 'moderate', equipment: 'none', duration: '10-15 min', sets: '3-4', reps: '30-60s', rest: '60s', intensity: 'moderate', focus: ['core'] },
-      { id: 'lunges', name: 'Forward Lunges', bodyPart: 'legs', target: 'lower body', calories: 90, difficulty: 'moderate', equipment: 'none', duration: '15-20 min', sets: '3-4', reps: '10-12', rest: '60-90s', intensity: 'moderate', focus: ['strength'] },
-      { id: 'jumping-jacks', name: 'Jumping Jacks', bodyPart: 'full body', target: 'cardiovascular', calories: 150, difficulty: 'moderate', equipment: 'none', duration: '10-15 min', sets: '3-4', reps: '20-30', rest: '60s', intensity: 'moderate', focus: ['cardiovascular'] },
-      { id: 'mountain-climbers', name: 'Mountain Climbers', bodyPart: 'core', target: 'conditioning', calories: 120, difficulty: 'moderate', equipment: 'none', duration: '10-15 min', sets: '3-4', reps: '20-30', rest: '60s', intensity: 'moderate', focus: ['conditioning'] }
+      { id: 'squats',                 name: 'Squats',                  bodyPart: 'legs',      target: 'lower body',      calories: 100, difficulty: 'moderate', equipment: 'none', duration: '15-20 min', sets: '3-4', reps: '12-15', rest: '60-90s', intensity: 'moderate', focus: ['strength'] },
+      { id: 'push-ups',              name: 'Pushups',                 bodyPart: 'chest',     target: 'upper body',      calories: 80,  difficulty: 'moderate', equipment: 'none', duration: '15-20 min', sets: '3-4', reps: '10-15', rest: '60-90s', intensity: 'moderate', focus: ['strength'] },
+      { id: 'lunges',                name: 'Lunges',                  bodyPart: 'legs',      target: 'lower body',      calories: 90,  difficulty: 'moderate', equipment: 'none', duration: '15-20 min', sets: '3-4', reps: '10-12', rest: '60-90s', intensity: 'moderate', focus: ['strength'] },
+      { id: 'side-lunges',           name: 'Side Lunges',             bodyPart: 'legs',      target: 'lower body',      calories: 85,  difficulty: 'moderate', equipment: 'none', duration: '15-20 min', sets: '3-4', reps: '10-12', rest: '60-90s', intensity: 'moderate', focus: ['strength'] },
+      { id: 'bicep-curl',            name: 'Bicep Curl',              bodyPart: 'arms',      target: 'upper body',      calories: 70,  difficulty: 'moderate', equipment: 'none', duration: '10-15 min', sets: '3-4', reps: '10-15', rest: '60s',    intensity: 'moderate', focus: ['strength'] },
+      { id: 'shoulder-press',        name: 'Shoulder Press',          bodyPart: 'shoulders', target: 'upper body',      calories: 90,  difficulty: 'moderate', equipment: 'none', duration: '10-15 min', sets: '3-4', reps: '10-12', rest: '60-90s', intensity: 'moderate', focus: ['strength'] }
     ],
     intermediate: [
-      { id: 'push-ups', name: 'Standard Push-ups', bodyPart: 'chest', target: 'upper body', calories: 80, difficulty: 'moderate', equipment: 'none', duration: '15-20 min', sets: '3-4', reps: '10-15', rest: '60-90s', intensity: 'moderate', focus: ['strength'] },
-      { id: 'squats', name: 'Bodyweight Squats', bodyPart: 'legs', target: 'lower body', calories: 100, difficulty: 'moderate', equipment: 'none', duration: '15-20 min', sets: '3-4', reps: '12-15', rest: '60-90s', intensity: 'moderate', focus: ['strength'] },
-      { id: 'plank', name: 'Plank Hold', bodyPart: 'core', target: 'stability', calories: 60, difficulty: 'moderate', equipment: 'none', duration: '10-15 min', sets: '3-4', reps: '30-60s', rest: '60s', intensity: 'moderate', focus: ['core'] },
-      { id: 'lunges', name: 'Forward Lunges', bodyPart: 'legs', target: 'lower body', calories: 90, difficulty: 'moderate', equipment: 'none', duration: '15-20 min', sets: '3-4', reps: '10-12', rest: '60-90s', intensity: 'moderate', focus: ['strength'] },
-      { id: 'jumping-jacks', name: 'Jumping Jacks', bodyPart: 'full body', target: 'cardiovascular', calories: 150, difficulty: 'moderate', equipment: 'none', duration: '10-15 min', sets: '3-4', reps: '20-30', rest: '60s', intensity: 'moderate', focus: ['cardiovascular'] },
-      { id: 'mountain-climbers', name: 'Mountain Climbers', bodyPart: 'core', target: 'conditioning', calories: 120, difficulty: 'moderate', equipment: 'none', duration: '10-15 min', sets: '3-4', reps: '20-30', rest: '60s', intensity: 'moderate', focus: ['conditioning'] }
+      { id: 'squats',                name: 'Squats',                  bodyPart: 'legs',      target: 'lower body',      calories: 100, difficulty: 'moderate', equipment: 'none', duration: '15-20 min', sets: '3-4', reps: '12-15', rest: '60-90s', intensity: 'moderate', focus: ['strength'] },
+      { id: 'push-ups',             name: 'Pushups',                 bodyPart: 'chest',     target: 'upper body',      calories: 80,  difficulty: 'moderate', equipment: 'none', duration: '15-20 min', sets: '3-4', reps: '10-15', rest: '60-90s', intensity: 'moderate', focus: ['strength'] },
+      { id: 'mountain-climbers',    name: 'Mountain Climbers',       bodyPart: 'core',      target: 'conditioning',    calories: 120, difficulty: 'moderate', equipment: 'none', duration: '10-15 min', sets: '3-4', reps: '20-30', rest: '60s',    intensity: 'moderate', focus: ['cardiovascular', 'conditioning'] },
+      { id: 'jumping-jacks',        name: 'Jumping Jacks',           bodyPart: 'full body', target: 'cardiovascular',  calories: 150, difficulty: 'moderate', equipment: 'none', duration: '10-15 min', sets: '3-4', reps: '20-30', rest: '60s',    intensity: 'moderate', focus: ['cardiovascular'] },
+      { id: 'high-knees',           name: 'High Knees',              bodyPart: 'full body', target: 'cardiovascular',  calories: 140, difficulty: 'moderate', equipment: 'none', duration: '10-15 min', sets: '3-4', reps: '20-30', rest: '60s',    intensity: 'moderate', focus: ['cardiovascular'] },
+      { id: 'standing-knee-to-elbow', name: 'Standing Knee-to-Elbow', bodyPart: 'core',   target: 'core & balance',  calories: 80,  difficulty: 'moderate', equipment: 'none', duration: '10-15 min', sets: '3-4', reps: '12-16', rest: '60s',    intensity: 'moderate', focus: ['core', 'conditioning'] }
     ],
     advanced: [
-      { id: 'diamond-push-ups', name: 'Diamond Push-ups', bodyPart: 'chest', target: 'upper body', calories: 100, difficulty: 'high', equipment: 'none', duration: '15-20 min', sets: '4-5', reps: '8-12', rest: '90s', intensity: 'high', focus: ['strength'] },
-      { id: 'pistol-squats', name: 'Pistol Squats', bodyPart: 'legs', target: 'lower body', calories: 150, difficulty: 'high', equipment: 'none', duration: '15-20 min', sets: '3-4', reps: '5-8', rest: '90-120s', intensity: 'high', focus: ['strength'] },
-      { id: 'burpees', name: 'Burpees', bodyPart: 'full body', target: 'conditioning', calories: 200, difficulty: 'high', equipment: 'none', duration: '10-15 min', sets: '4-5', reps: '8-12', rest: '90s', intensity: 'high', focus: ['conditioning'] },
-      { id: 'handstand-push-ups', name: 'Handstand Push-ups', bodyPart: 'shoulders', target: 'upper body', calories: 120, difficulty: 'high', equipment: 'wall', duration: '15-20 min', sets: '3-4', reps: '3-8', rest: '120s', intensity: 'high', focus: ['strength'] },
-      { id: 'muscle-ups', name: 'Muscle-ups', bodyPart: 'full body', target: 'strength', calories: 180, difficulty: 'high', equipment: 'pull-up bar', duration: '15-20 min', sets: '3-4', reps: '3-6', rest: '120s', intensity: 'high', focus: ['strength'] },
-      { id: 'sprint-intervals', name: 'Sprint Intervals', bodyPart: 'full body', target: 'cardiovascular', calories: 250, difficulty: 'high', equipment: 'none', duration: '15-20 min', sets: '6-8', reps: '30s', rest: '90s', intensity: 'high', focus: ['cardiovascular'] }
+      { id: 'push-ups',             name: 'Pushups',                 bodyPart: 'chest',     target: 'upper body',      calories: 80,  difficulty: 'high',     equipment: 'none', duration: '15-20 min', sets: '4-5', reps: '15-20', rest: '60-90s', intensity: 'high',     focus: ['strength'] },
+      { id: 'squats',               name: 'Squats',                  bodyPart: 'legs',      target: 'lower body',      calories: 100, difficulty: 'high',     equipment: 'none', duration: '15-20 min', sets: '4-5', reps: '15-20', rest: '60-90s', intensity: 'high',     focus: ['strength'] },
+      { id: 'mountain-climbers',   name: 'Mountain Climbers',       bodyPart: 'core',      target: 'conditioning',    calories: 120, difficulty: 'high',     equipment: 'none', duration: '10-15 min', sets: '4-5', reps: '30-40', rest: '60s',    intensity: 'high',     focus: ['cardiovascular', 'conditioning'] },
+      { id: 'high-knees',          name: 'High Knees',              bodyPart: 'full body', target: 'cardiovascular',  calories: 140, difficulty: 'high',     equipment: 'none', duration: '10-15 min', sets: '4-5', reps: '30-40', rest: '60s',    intensity: 'high',     focus: ['cardiovascular'] },
+      { id: 'lunges',              name: 'Lunges',                  bodyPart: 'legs',      target: 'lower body',      calories: 90,  difficulty: 'high',     equipment: 'none', duration: '15-20 min', sets: '4-5', reps: '15-20', rest: '60-90s', intensity: 'high',     focus: ['strength'] },
+      { id: 'plank',               name: 'Plank',                   bodyPart: 'core',      target: 'stability',       calories: 60,  difficulty: 'high',     equipment: 'none', duration: '10-15 min', sets: '4-5', reps: '45-60s', rest: '60s',   intensity: 'high',     focus: ['core'] }
     ]
   });
 
@@ -460,9 +629,12 @@ function Calculator() {
   };
 
   const getFallbackExercises = () => [
-    { id: 'push-ups', name: 'Push-ups', bodyPart: 'chest', target: 'upper body', calories: 80, difficulty: 'moderate', equipment: 'none', duration: '15-20 min', sets: '3-4', reps: '10-12', rest: '60-90s', intensity: 'moderate', aiInsight: 'Standard exercise for upper body strength' },
-    { id: 'squats', name: 'Bodyweight Squats', bodyPart: 'legs', target: 'lower body', calories: 100, difficulty: 'moderate', equipment: 'none', duration: '15-20 min', sets: '3-4', reps: '10-12', rest: '60-90s', intensity: 'moderate', aiInsight: 'Fundamental lower body exercise' },
-    { id: 'plank', name: 'Plank', bodyPart: 'core', target: 'stability', calories: 60, difficulty: 'moderate', equipment: 'none', duration: '10-15 min', sets: '3-4', reps: '10-12', rest: '60-90s', intensity: 'moderate', aiInsight: 'Core stability and strength' }
+    { id: 'push-ups',       name: 'Pushups',         bodyPart: 'chest',     target: 'upper body',    calories: 80,  difficulty: 'moderate', equipment: 'none', duration: '15-20 min', sets: '3-4', reps: '10-12', rest: '60-90s', intensity: 'moderate', aiInsight: 'Great for building upper body strength and endurance.' },
+    { id: 'squats',         name: 'Squats',          bodyPart: 'legs',      target: 'lower body',    calories: 100, difficulty: 'moderate', equipment: 'none', duration: '15-20 min', sets: '3-4', reps: '10-12', rest: '60-90s', intensity: 'moderate', aiInsight: 'Fundamental compound lower body movement.' },
+    { id: 'plank',          name: 'Plank',           bodyPart: 'core',      target: 'stability',     calories: 60,  difficulty: 'low',      equipment: 'none', duration: '10-15 min', sets: '3-4', reps: '30-45s', rest: '60s',   intensity: 'moderate', aiInsight: 'Builds core stability and improves posture.' },
+    { id: 'jumping-jacks',  name: 'Jumping Jacks',   bodyPart: 'full body', target: 'cardiovascular',calories: 150, difficulty: 'moderate', equipment: 'none', duration: '10-15 min', sets: '3-4', reps: '20-30', rest: '60s',   intensity: 'moderate', aiInsight: 'Excellent warm-up and cardio exercise.' },
+    { id: 'lunges',         name: 'Lunges',          bodyPart: 'legs',      target: 'lower body',    calories: 90,  difficulty: 'moderate', equipment: 'none', duration: '15-20 min', sets: '3-4', reps: '10-12', rest: '60-90s', intensity: 'moderate', aiInsight: 'Targets quads, hamstrings, and glutes effectively.' },
+    { id: 'glute-bridge',   name: 'Glute Bridge',    bodyPart: 'glutes',    target: 'lower body',    calories: 55,  difficulty: 'low',      equipment: 'none', duration: '10-15 min', sets: '3-4', reps: '12-15', rest: '60s',   intensity: 'low',      aiInsight: 'Activates glutes and strengthens the posterior chain.' }
   ];
 
   // Radial BMI chart
@@ -729,18 +901,39 @@ function Calculator() {
               {/* Grid: Left = 2D Animation, Right = Steps & Info */}
               <div style={{ display: 'grid', gridTemplateColumns: 'minmax(240px, 300px) 1fr', gap: '2rem', alignItems: 'start' }}>
                 
-                {/* 2D Canvas Container */}
-                <div style={{ background: '#050608', border: '1px solid var(--border)', borderRadius: 14, padding: '1.25rem', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                  <div style={{ fontSize: '0.68rem', fontWeight: 800, color: 'var(--accent)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                    <Play size={12} fill="var(--accent)" /> 2D Motion Visualizer
-                  </div>
-                  
-                  <div style={{ background: '#0a0c10', borderRadius: 10, padding: '1rem', width: '100%', display: 'grid', placeItems: 'center', border: '1px stroke rgba(255,255,255,0.03)' }}>
-                    <ExerciseAnimation exerciseId={selectedExercise.id} />
+                {/* Video Demo Container */}
+                <div style={{ background: '#050608', border: '1px solid var(--border)', borderRadius: 14, padding: '1.25rem', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.75rem' }}>
+                  <div style={{ fontSize: '0.68rem', fontWeight: 800, color: 'var(--accent)', letterSpacing: '0.1em', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                    <Play size={12} fill="var(--accent)" /> Exercise Demo Video
                   </div>
 
-                  <div style={{ fontSize: '0.72rem', color: 'var(--text3)', textAlign: 'center', marginTop: '0.85rem', lineHeight: 1.4 }}>
-                    Looping real-time biomechanical 2D vector animation
+                  {EXERCISE_VIDEOS[selectedExercise.id] ? (
+                    <video
+                      key={selectedExercise.id}
+                      src={EXERCISE_VIDEOS[selectedExercise.id]}
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      controls
+                      style={{
+                        width: '100%',
+                        borderRadius: 10,
+                        background: '#000',
+                        outline: 'none',
+                        maxHeight: 300,
+                        objectFit: 'contain',
+                        border: '1px solid rgba(200,240,74,0.15)'
+                      }}
+                    />
+                  ) : (
+                    <div style={{ width: '100%', background: '#0a0c10', borderRadius: 10, padding: '1rem', display: 'grid', placeItems: 'center', minHeight: 200 }}>
+                      <ExerciseAnimation exerciseId={selectedExercise.id} />
+                    </div>
+                  )}
+
+                  <div style={{ fontSize: '0.72rem', color: 'var(--text3)', textAlign: 'center', lineHeight: 1.4 }}>
+                    Real demonstration video — watch the form carefully
                   </div>
                 </div>
 
