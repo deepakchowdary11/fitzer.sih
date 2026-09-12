@@ -1,6 +1,8 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import { LogOut, AlertTriangle, X, Loader2 } from 'lucide-react';
 import { CinematicLayout, AiFab, Kicker } from './CinematicLayout';
+import { useAuth } from './AuthContext';
 
 /* ── helpers ── */
 const fmt = (v, unit = '') => (v ? `${v}${unit}` : '—');
@@ -30,14 +32,14 @@ const ACTIVITY_LABEL = {
 function bmiColor(bmi) {
   if (!bmi) return '#6b6763';
   if (bmi < 18.5) return '#60a5fa';
-  if (bmi < 25)   return '#c8f04a';
+  if (bmi < 25)   return '#ff6b35';
   if (bmi < 30)   return '#f59e0b';
   return '#ef4444';
 }
 
 function sleepScore(h) {
   if (!h) return null;
-  if (h >= 7 && h <= 9) return { score: 100, label: 'Optimal', color: '#c8f04a' };
+  if (h >= 7 && h <= 9) return { score: 100, label: 'Optimal', color: '#ff6b35' };
   if (h === 6 || h === 10) return { score: 70, label: 'Fair', color: '#f59e0b' };
   return { score: 35, label: 'Poor', color: '#ef4444' };
 }
@@ -52,13 +54,13 @@ function bodyFatCategory(fat, gender) {
   if (!fat) return null;
   if (gender === 'female') {
     if (fat < 14) return { label: 'Essential Fat', color: '#60a5fa' };
-    if (fat < 21) return { label: 'Athletic', color: '#c8f04a' };
+    if (fat < 21) return { label: 'Athletic', color: '#ff6b35' };
     if (fat < 25) return { label: 'Fitness', color: '#a3e635' };
     if (fat < 32) return { label: 'Average', color: '#f59e0b' };
     return { label: 'Obese Zone', color: '#ef4444' };
   }
   if (fat < 6)  return { label: 'Essential Fat', color: '#60a5fa' };
-  if (fat < 14) return { label: 'Athletic', color: '#c8f04a' };
+  if (fat < 14) return { label: 'Athletic', color: '#ff6b35' };
   if (fat < 18) return { label: 'Fitness', color: '#a3e635' };
   if (fat < 25) return { label: 'Average', color: '#f59e0b' };
   return { label: 'Obese Zone', color: '#ef4444' };
@@ -66,7 +68,7 @@ function bodyFatCategory(fat, gender) {
 
 const GOAL_META = {
   lose:     { label: 'Weight Loss',    emoji: '🔥', color: '#ef4444', tip: 'Aim for a 300–500 kcal deficit daily.' },
-  maintain: { label: 'Maintenance',   emoji: '⚖️', color: '#c8f04a', tip: 'Eat at TDEE and keep training consistent.' },
+  maintain: { label: 'Maintenance',   emoji: '⚖️', color: '#ff6b35', tip: 'Eat at TDEE and keep training consistent.' },
   gain:     { label: 'Muscle Gain',   emoji: '💪', color: '#60a5fa', tip: 'Eat 200–300 kcal above TDEE with high protein.' },
   build:    { label: 'Build Muscle',  emoji: '🏋️', color: '#a78bfa', tip: 'Progressive overload + 1.6–2.2g protein/kg.' },
   endurance:{ label: 'Endurance',     emoji: '🏃', color: '#fb923c', tip: 'Prioritise carb fuelling and Zone 2 cardio.' },
@@ -82,7 +84,7 @@ function StatTile({ label, value, sub, accent }) {
       padding: '1rem',
     }}>
       <div style={{ fontSize: '0.68rem', color: 'var(--text3)', textTransform: 'uppercase', letterSpacing: '0.09em', marginBottom: '0.35rem' }}>{label}</div>
-      <div style={{ fontFamily: 'Anton, sans-serif', fontSize: '1.45rem', color: accent || 'var(--text)', lineHeight: 1 }}>{value}</div>
+      <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: '1.45rem', color: accent || 'var(--text)', lineHeight: 1 }}>{value}</div>
       {sub && <div style={{ fontSize: '0.7rem', color: 'var(--text3)', marginTop: '0.3rem' }}>{sub}</div>}
     </div>
   );
@@ -105,7 +107,7 @@ function RadialGauge({ value, max, color, label, unit }) {
           fill="none" stroke={color} strokeWidth={9} strokeLinecap="round"
           strokeDasharray={`${dash} ${circumference}`} style={{ transition: 'stroke-dasharray 0.6s ease' }} />
         <text x={cx} y={cy - 4} textAnchor="middle" fill={color}
-          style={{ fontFamily: 'Anton, sans-serif', fontSize: 18 }}>
+          style={{ fontFamily: "'Outfit', sans-serif", fontSize: 18 }}>
           {value || '—'}{unit}
         </text>
       </svg>
@@ -136,26 +138,43 @@ function BarRow({ label, pct, color, right }) {
 
 export default function Profile() {
   const [showMotivate, setShowMotivate] = React.useState(false);
+  const { user: authUser, signOut, loading: authLoading } = useAuth();
 
-  const user = React.useMemo(() => {
+  const localUser = React.useMemo(() => {
     try { return JSON.parse(localStorage.getItem('fitzer.user') || '{}'); } catch { return {}; }
   }, []);
 
+  const user = authUser || localUser;
+
   const bmi = React.useMemo(() => {
-    try { return JSON.parse(localStorage.getItem('fitzer.bmi') || '{}'); } catch { return {}; }
-  }, []);
-
-  const weightHistory = React.useMemo(() => {
-    try { return JSON.parse(localStorage.getItem('fitzer.weightHistory') || '[]'); } catch { return []; }
-  }, []);
-
-  React.useEffect(() => {
-    if (!user || !user.name || !user.username) window.location.hash = '#/login';
+    try {
+      if (user?.id) {
+        const savedUserBmi = localStorage.getItem(`fitzer.bmi.${user.id}`);
+        if (savedUserBmi) return JSON.parse(savedUserBmi);
+      }
+      return {};
+    } catch { return {}; }
   }, [user]);
 
+  const weightHistory = React.useMemo(() => {
+    try {
+      if (user?.id) {
+        const savedHistory = localStorage.getItem(`fitzer.weightHistory.${user.id}`);
+        if (savedHistory) return JSON.parse(savedHistory);
+      }
+      return [];
+    } catch { return []; }
+  }, [user]);
+
+  React.useEffect(() => {
+    if (!authLoading && (!user || (!user.name && !user.email))) {
+      window.location.hash = '#/login';
+    }
+  }, [user, authLoading]);
+
   /* ── parsed fields ── */
-  const name        = user.name || '';
-  const username    = user.username ? `@${user.username}` : '';
+  const name        = user.name || user.email?.split('@')[0] || 'Athlete';
+  const username    = user.username ? (user.username.startsWith('@') ? user.username : `@${user.username}`) : `@${name.toLowerCase().replace(/\s+/g, '')}`;
   const heightCm    = Number(bmi.heightCm)          || 0;
   const weightKg    = Number(bmi.weightKg)           || 0;
   const age         = Number(bmi.age)                || 0;
@@ -208,26 +227,182 @@ export default function Profile() {
     }));
   }, [weightHistory, weightKg]);
 
+  const [showSignOutModal, setShowSignOutModal] = React.useState(false);
+  const [signingOut, setSigningOut] = React.useState(false);
+
+  const handleConfirmSignOut = async () => {
+    setSigningOut(true);
+    try {
+      await signOut();
+    } catch (e) {
+      console.error('SignOut error:', e);
+      localStorage.removeItem('fitzer.user');
+      window.location.hash = '#/';
+    } finally {
+      setSigningOut(false);
+      setShowSignOutModal(false);
+    }
+  };
+
   const card = { marginBottom: '1.25rem' };
 
   return (
     <CinematicLayout fab={<AiFab />}>
       <div className="cn-content" style={{ maxWidth: 900 }}>
-        <Kicker num="04" label="Profile" />
-        <h1 className="cn-h1" style={{ marginBottom: '2rem' }}>Profile & Analytics</h1>
+        <Kicker num="04" label="Athlete Profile & Cloud Sync" />
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
+          <h1 className="cn-h1" style={{ margin: 0 }}>Profile & Analytics</h1>
+          <button
+            onClick={() => setShowSignOutModal(true)}
+            className="cn-btn-ghost"
+            style={{ padding: '0.45rem 1rem', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#fca5a5', borderColor: 'rgba(239,68,68,0.3)' }}
+          >
+            <LogOut size={14} /> Sign Out
+          </button>
+        </div>
+
+        {/* ── Sign Out Confirmation Modal ── */}
+        <AnimatePresence>
+          {showSignOutModal && (
+            <div
+              style={{
+                position: 'fixed',
+                inset: 0,
+                zIndex: 99999,
+                background: 'rgba(0,0,0,0.75)',
+                backdropFilter: 'blur(8px)',
+                WebkitBackdropFilter: 'blur(8px)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '1.5rem',
+              }}
+              onClick={() => !signingOut && setShowSignOutModal(false)}
+            >
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 15 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 15 }}
+                transition={{ duration: 0.2 }}
+                onClick={(e) => e.stopPropagation()}
+                style={{
+                  background: 'linear-gradient(135deg, rgba(20,16,24,0.98), rgba(12,10,16,0.99))',
+                  border: '1px solid rgba(239,68,68,0.35)',
+                  boxShadow: '0 20px 50px rgba(0,0,0,0.8), 0 0 30px rgba(239,68,68,0.15)',
+                  borderRadius: 18,
+                  padding: '2rem',
+                  maxWidth: 420,
+                  width: '100%',
+                  textAlign: 'center',
+                }}
+              >
+                <div
+                  style={{
+                    width: 52,
+                    height: 52,
+                    borderRadius: '50%',
+                    background: 'rgba(239,68,68,0.14)',
+                    border: '1px solid rgba(239,68,68,0.3)',
+                    display: 'grid',
+                    placeItems: 'center',
+                    margin: '0 auto 1.25rem',
+                    color: '#f87171',
+                  }}
+                >
+                  <AlertTriangle size={24} />
+                </div>
+
+                <h3 className="cn-h2" style={{ marginBottom: '0.5rem', fontSize: '1.3rem' }}>
+                  Sign Out of Fitzer?
+                </h3>
+                <p style={{ color: 'var(--text2)', fontSize: '0.86rem', lineHeight: 1.6, marginBottom: '1.75rem' }}>
+                  Are you sure you want to sign out? You will be redirected to the home page and need to sign in again to access workouts and diet analytics.
+                </p>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                  <button
+                    type="button"
+                    onClick={() => setShowSignOutModal(false)}
+                    disabled={signingOut}
+                    className="cn-btn-ghost"
+                    style={{ justifyContent: 'center', padding: '0.75rem', fontSize: '0.85rem' }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleConfirmSignOut}
+                    disabled={signingOut}
+                    style={{
+                      padding: '0.75rem',
+                      borderRadius: 10,
+                      background: 'linear-gradient(135deg, #ef4444, #dc2626)',
+                      border: 'none',
+                      color: '#fff',
+                      fontWeight: 700,
+                      fontSize: '0.85rem',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '0.4rem',
+                      boxShadow: '0 4px 14px rgba(239,68,68,0.35)',
+                      transition: 'all 0.2s',
+                    }}
+                  >
+                    {signingOut ? (
+                      <>
+                        <Loader2 size={16} className="animate-spin" /> Signing out...
+                      </>
+                    ) : (
+                      <>
+                        <LogOut size={16} /> Yes, Sign Out
+                      </>
+                    )}
+                  </button>
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
 
         {/* ── User Card ── */}
-        <div className="cn-card" style={card}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
-            <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'var(--accent2)', border: '1px solid rgba(200,240,74,0.3)', display: 'grid', placeItems: 'center', flexShrink: 0 }}>
-              <span style={{ fontFamily: 'Anton, sans-serif', fontSize: '1.3rem', color: 'var(--accent)' }}>{name.charAt(0).toUpperCase()}</span>
+        <div className="cn-glow-card" style={{ ...card, padding: '2rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', marginBottom: '1.75rem' }}>
+            <div style={{ position: 'relative' }}>
+              {user.avatar_url ? (
+                <img
+                  src={user.avatar_url}
+                  alt={name}
+                  referrerPolicy="no-referrer"
+                  style={{
+                    width: 64,
+                    height: 64,
+                    borderRadius: '50%',
+                    objectFit: 'cover',
+                    border: '2px solid var(--accent)',
+                    flexShrink: 0,
+                    boxShadow: '0 0 20px rgba(255,107,53,0.35)',
+                    display: 'block',
+                  }}
+                />
+              ) : (
+                <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'linear-gradient(135deg, rgba(255,107,53,0.3), rgba(255,56,100,0.2))', border: '2px solid var(--accent)', display: 'grid', placeItems: 'center', flexShrink: 0, boxShadow: '0 0 20px rgba(255,107,53,0.35)' }}>
+                  <span style={{ fontFamily: "'Outfit', sans-serif", fontSize: '1.5rem', fontWeight: 900, color: 'var(--text)' }}>{name.charAt(0).toUpperCase()}</span>
+                </div>
+              )}
+              <div style={{ position: 'absolute', bottom: -4, right: -4, background: 'var(--accent)', borderRadius: '50%', width: 20, height: 20, display: 'grid', placeItems: 'center', border: '2px solid var(--bg)' }}>
+                <span className="cn-streak-flame" style={{ transform: 'scale(0.7)' }}>
+                  🔥
+                </span>
+              </div>
             </div>
             <div style={{ flex: 1 }}>
-              <div className="cn-h2" style={{ lineHeight: 1.2 }}>{name}</div>
-              <div style={{ fontSize: '0.8rem', color: 'var(--text3)', marginTop: '0.1rem' }}>{username}</div>
+              <div className="cn-h2" style={{ lineHeight: 1.2, fontSize: '1.5rem' }}>{name}</div>
+              <div style={{ fontSize: '0.85rem', color: 'var(--accent)', marginTop: '0.2rem', fontWeight: 600 }}>{username}</div>
             </div>
             {/* Goal badge */}
-            <div style={{ background: `${goalMeta.color}18`, border: `1px solid ${goalMeta.color}44`, borderRadius: 20, padding: '0.35rem 0.85rem', fontSize: '0.75rem', fontWeight: 700, color: goalMeta.color, whiteSpace: 'nowrap' }}>
+            <div style={{ background: `${goalMeta.color}18`, border: `1.5px solid ${goalMeta.color}44`, borderRadius: 20, padding: '0.45rem 1.1rem', fontSize: '0.78rem', fontWeight: 800, color: goalMeta.color, whiteSpace: 'nowrap', boxShadow: `0 4px 16px ${goalMeta.color}22` }}>
               {goalMeta.emoji} {goalMeta.label}
             </div>
           </div>
@@ -242,12 +417,14 @@ export default function Profile() {
         </div>
 
         {/* ── BMI + Body Gauges ── */}
-        <div className="cn-card" style={card}>
-          <h3 className="cn-h2" style={{ marginBottom: '1.5rem' }}>🧬 Body Metrics</h3>
+        <div className="cn-glow-card" style={{ ...card, padding: '2rem' }}>
+          <h3 className="cn-h2" style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            🧬 Body Composition & Metrics
+          </h3>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
             <RadialGauge value={bmiValue} max={40} color={bmiCol} label="BMI" unit="" />
-            {bodyFat > 0 && <RadialGauge value={bodyFat} max={50} color={fatCat?.color || '#c8f04a'} label="Body Fat" unit="%" />}
-            {sleepHours > 0 && <RadialGauge value={sleepHours} max={10} color={sleep?.color || '#c8f04a'} label="Sleep hrs" unit="h" />}
+            {bodyFat > 0 && <RadialGauge value={bodyFat} max={50} color={fatCat?.color || '#ff6b35'} label="Body Fat" unit="%" />}
+            {sleepHours > 0 && <RadialGauge value={sleepHours} max={10} color={sleep?.color || '#ff6b35'} label="Sleep hrs" unit="h" />}
             {bmr > 0 && <RadialGauge value={bmr} max={3000} color="#a78bfa" label="BMR kcal" unit="" />}
           </div>
 
@@ -267,7 +444,7 @@ export default function Profile() {
             <h3 className="cn-h2" style={{ marginBottom: '1.5rem' }}>⚡ Energy & Calories</h3>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '0.85rem', marginBottom: '1.5rem' }}>
               <StatTile label="BMR"              value={`${bmr} kcal`}    sub="Calories at complete rest"    accent="#a78bfa" />
-              <StatTile label="TDEE"             value={`${tdee} kcal`}   sub={ACTIVITY_LABEL[activity]}     accent="#c8f04a" />
+              <StatTile label="TDEE"             value={`${tdee} kcal`}   sub={ACTIVITY_LABEL[activity]}     accent="#ff6b35" />
               <StatTile label="Daily Goal"       value={`${calTarget} kcal`} sub={goalMeta.label + ' target'} accent={goalMeta.color} />
               <StatTile label="Protein Target"   value={`${Math.round(weightKg * 1.8)}g`} sub="~1.8g per kg body weight" accent="#fb923c" />
             </div>
@@ -305,7 +482,7 @@ export default function Profile() {
                   <span>🎯 Ideal: <strong style={{ color: 'var(--accent)' }}>{idealRange.low}–{idealRange.high} kg</strong></span>
                   <span>📍 Current: <strong style={{ color: 'var(--text)' }}>{weightKg} kg</strong></span>
                   {weightKg && idealRange && (
-                    <span style={{ color: weightKg <= Number(idealRange.high) && weightKg >= Number(idealRange.low) ? '#c8f04a' : '#f59e0b' }}>
+                    <span style={{ color: weightKg <= Number(idealRange.high) && weightKg >= Number(idealRange.low) ? '#ff6b35' : '#f59e0b' }}>
                       {weightKg < Number(idealRange.low) ? `↑ ${(Number(idealRange.low) - weightKg).toFixed(1)} kg to ideal` :
                        weightKg > Number(idealRange.high) ? `↓ ${(weightKg - Number(idealRange.high)).toFixed(1)} kg to ideal` : '✓ In ideal range'}
                     </span>
@@ -358,7 +535,7 @@ export default function Profile() {
                 label="Sleep Score"
                 pct={sleep?.score || 0}
                 right={`${sleep?.score || 0}%`}
-                color={sleep?.color || '#c8f04a'}
+                color={sleep?.color || '#ff6b35'}
               />
             )}
             {bodyFat > 0 && (
@@ -366,7 +543,7 @@ export default function Profile() {
                 label="Body Fat %"
                 pct={Math.min(bodyFat * 2, 100)}
                 right={`${bodyFat}%`}
-                color={fatCat?.color || '#c8f04a'}
+                color={fatCat?.color || '#ff6b35'}
               />
             )}
           </div>

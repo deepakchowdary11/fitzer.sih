@@ -33,9 +33,9 @@ export default function Preloader({ onDone }) {
 
   /* Three dumbbells with different drop delays & horizontal positions */
   const dumbbells = [
-    { id: 'db1', delay: 0.05, x: '-80px',  size: 72,  color: '#c8f04a' },
-    { id: 'db2', delay: 0.25, x: '0px',    size: 90,  color: '#f0ede8' },
-    { id: 'db3', delay: 0.45, x: '80px',   size: 68,  color: '#c8f04a' },
+    { id: 'db1', delay: 0.05, x: '-80px',  size: 72,  color: '#ff6b35' },
+    { id: 'db2', delay: 0.25, x: '0px',    size: 90,  color: '#fff1e6' },
+    { id: 'db3', delay: 0.45, x: '80px',   size: 68,  color: '#ff3864' },
   ];
 
   return (
@@ -50,7 +50,7 @@ export default function Preloader({ onDone }) {
             position: 'fixed',
             inset: 0,
             zIndex: 99999,
-            background: '#080808',
+            background: '#060608',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
@@ -67,11 +67,15 @@ export default function Preloader({ onDone }) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
             style={{
-              fontFamily: 'Anton, sans-serif',
+              fontFamily: "'Outfit', sans-serif",
               fontSize: 'clamp(3rem, 12vw, 8rem)',
+              fontWeight: 900,
               lineHeight: 1,
-              letterSpacing: '-0.02em',
-              color: '#f0ede8',
+              letterSpacing: '-0.03em',
+              background: 'linear-gradient(100deg, #ff6b35 0%, #ff9500 40%, #ffcc00 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
               marginBottom: '0.5rem',
               userSelect: 'none',
             }}
@@ -90,7 +94,7 @@ export default function Preloader({ onDone }) {
               fontWeight: 500,
               letterSpacing: '0.18em',
               textTransform: 'uppercase',
-              color: '#6b6763',
+              color: 'rgba(255,235,215,0.35)',
               marginBottom: '3rem',
             }}
           >
@@ -153,7 +157,7 @@ export default function Preloader({ onDone }) {
                   style={{
                     width: size * 0.85,
                     height: 6,
-                    background: 'radial-gradient(ellipse, rgba(200,240,74,0.5) 0%, transparent 80%)',
+                    background: 'radial-gradient(ellipse, rgba(255,107,53,0.55) 0%, transparent 80%)',
                     borderRadius: '50%',
                     margin: '4px auto 0',
                     filter: 'blur(2px)',
@@ -171,7 +175,7 @@ export default function Preloader({ onDone }) {
 }
 
 /* ── Dumbbell SVG ── */
-function DumbbellSVG({ size = 80, color = '#c8f04a' }) {
+function DumbbellSVG({ size = 80, color = '#ff6b35' }) {
   const s = size;
   // Proportions: bar occupies middle, plates on each side
   const barW = s * 0.38;

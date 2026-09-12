@@ -1,7 +1,7 @@
 import React from 'react';
 
 /* ── Color System ── */
-const ACCENT = '#c8f04a';     // Electric neon lime accent
+const ACCENT = '#ff6b35';     // Electric neon lime accent
 const MUSCLE = '#ff5555';     // Muscle engagement glow red/pink
 const BONE   = '#f8fafc';     // Clean off-white limbs
 const JOINT  = '#38bdf8';     // Cyan joint pivot points
@@ -148,7 +148,7 @@ function Canvas({ children, title, subtitle, targetMuscle }) {
       </svg>
       
       {/* Target Muscle Badge */}
-      <div style={{ marginTop: '0.4rem', fontSize: '0.68rem', fontWeight: 800, color: ACCENT, background: 'rgba(200, 240, 74, 0.08)', border: '1px solid rgba(200, 240, 74, 0.25)', borderRadius: 20, padding: '0.2rem 0.65rem', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+      <div style={{ marginTop: '0.4rem', fontSize: '0.68rem', fontWeight: 800, color: ACCENT, background: 'rgba(255,107,53,0.08)', border: '1px solid rgba(255,107,53,0.25)', borderRadius: 20, padding: '0.2rem 0.65rem', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
         Active Muscles: {targetMuscle}
       </div>
     </div>

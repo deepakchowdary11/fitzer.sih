@@ -1,161 +1,182 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Apple, Bot, Dumbbell, Activity, Brain } from 'lucide-react';
+import { Apple, Bot, Dumbbell, Brain, ArrowRight, Flame, Zap, Target, TrendingUp } from 'lucide-react';
 import { CinematicLayout, AiFab, Kicker, ScrollReveal } from './CinematicLayout';
 
 const HERO_WORDS = ['Train.', 'Fuel.', 'Transform.'];
 
 export default function Home() {
   const [wordIdx, setWordIdx] = React.useState(0);
-  const [leaving, setLeaving] = React.useState(false);
 
   React.useEffect(() => {
     const id = setInterval(() => {
-      setLeaving(true);
-      setTimeout(() => {
-        setWordIdx(i => (i + 1) % HERO_WORDS.length);
-        setLeaving(false);
-      }, 500);
-    }, 2000);
+      setWordIdx(i => (i + 1) % HERO_WORDS.length);
+    }, 2200);
     return () => clearInterval(id);
   }, []);
 
   return (
     <CinematicLayout fab={<AiFab />}>
       {/* ── Hero ── */}
-      <section id="home" style={{
-        minHeight: 'calc(100vh - 64px)',
-        position: 'relative',
-        display: 'grid',
-        gridTemplateColumns: '1fr 1fr',
-        overflow: 'hidden',
-      }}>
-        <div className="cn-hero-bg" />
+      <section
+        id="home"
+        style={{
+          minHeight: 'calc(100vh - 64px)',
+          position: 'relative',
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr',
+          overflow: 'hidden',
+        }}
+      >
+        {/* Ambient background */}
+        <div style={{
+          position: 'absolute', inset: 0,
+          background: 'linear-gradient(135deg, #1a0500 0%, var(--bg) 50%, #07000f 100%)',
+          zIndex: 0,
+        }} />
+        <div style={{
+          position: 'absolute', inset: 0, zIndex: 0,
+          background: 'radial-gradient(ellipse 65% 60% at 15% 55%, rgba(255,107,53,0.09) 0%, transparent 65%)',
+        }} />
 
         {/* ── LEFT: Text content ── */}
         <div style={{
-          position: 'relative',
-          zIndex: 1,
-          display: 'flex',
-          flexDirection: 'column',
+          position: 'relative', zIndex: 1,
+          display: 'flex', flexDirection: 'column',
           justifyContent: 'flex-end',
           padding: '4rem 2.5rem 4rem 2.5rem',
         }}>
-          <p className="cn-hero-subline">
-            <strong>Fitzer</strong> — Your intelligent fitness companion
-          </p>
-
-          <h1 className="cn-hero-title" aria-label="Train. Fuel. Transform.">
-            <span className="cn-word-window" aria-hidden="true">
-              <AnimatePresence mode="wait">
-                <motion.span
-                  key={wordIdx}
-                  className="cn-word is-current"
-                  initial={{ opacity: 0, y: '100%' }}
-                  animate={{ opacity: 1, y: '0%' }}
-                  exit={{ opacity: 0, y: '-100%' }}
-                  transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-                  style={{ display: 'block' }}
-                >
-                  {HERO_WORDS[wordIdx]}
-                </motion.span>
-              </AnimatePresence>
+          {/* Eyebrow badge */}
+          <div style={{
+            display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
+            marginBottom: '1.5rem',
+            background: 'rgba(255,107,53,0.10)',
+            border: '1px solid rgba(255,107,53,0.28)',
+            borderRadius: '999px',
+            padding: '0.3rem 0.85rem',
+            width: 'fit-content',
+          }}>
+            <Flame size={13} style={{ color: 'var(--accent)' }} />
+            <span style={{ fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.1em', color: 'var(--accent)', textTransform: 'uppercase' }}>
+              Fitzer — Your AI Fitness Companion
             </span>
+          </div>
+
+          <h1
+            style={{
+              fontFamily: "'Outfit', sans-serif",
+              fontSize: 'clamp(3rem, 8vw, 7rem)',
+              fontWeight: 900,
+              lineHeight: 0.95,
+              letterSpacing: '-0.03em',
+              color: 'var(--text)',
+              marginBottom: '2rem',
+              overflow: 'hidden',
+            }}
+            aria-label="Train. Fuel. Transform."
+          >
+            <AnimatePresence mode="wait">
+              <motion.span
+                key={wordIdx}
+                initial={{ opacity: 0, y: '60%' }}
+                animate={{ opacity: 1, y: '0%' }}
+                exit={{ opacity: 0, y: '-60%' }}
+                transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                style={{
+                  display: 'block',
+                  background: 'var(--grad-text)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                }}
+              >
+                {HERO_WORDS[wordIdx]}
+              </motion.span>
+            </AnimatePresence>
           </h1>
 
-          <p className="cn-hero-desc">
-            Smart exercise plans, personalized diets, and an on-page AI coach.
-            Your fitness journey — data-driven and simple.
+          <p style={{ color: 'var(--text2)', fontSize: '1rem', maxWidth: 400, lineHeight: 1.75, marginBottom: '2.5rem' }}>
+            Smart exercise plans, personalized diets, and an AI coach — all powered by real science and your body data.
           </p>
 
-          <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginBottom: '2.5rem' }}>
-            <a href="#/diet" className="cn-btn" style={{ textDecoration: 'none' }}>
-              <Apple size={16} />
-              Get Your Diet Plan
-            </a>
-            <a href="#/exercise" className="cn-btn-ghost" style={{ textDecoration: 'none' }}>
+          <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginBottom: '3rem' }}>
+            <a href="#/exercise" className="cn-btn" style={{ textDecoration: 'none' }}>
               <Dumbbell size={16} />
-              Browse Exercises
+              Start Training
+            </a>
+            <a href="#/diet" className="cn-btn-ghost" style={{ textDecoration: 'none' }}>
+              <Apple size={16} />
+              View Diet Plans
             </a>
           </div>
 
-          <div className="cn-hero-stats">
-            <StatCounter to={650} suffix="+" label="Workouts" />
-            <StatCounter to={120} suffix="+" label="Diet Plans" />
-            <StatCounter to={25} suffix="k" label="Active Users" />
-            <StatCounter to={18} suffix="d" label="Avg Streak" />
+          {/* Stats row */}
+          <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
+            <FireStat to={650} suffix="+" label="Workouts" />
+            <FireStat to={120} suffix="+" label="Diet Plans" />
+            <FireStat to={25} suffix="k" label="Users" />
+            <FireStat to={18} suffix="d" label="Avg Streak" />
           </div>
         </div>
 
-        {/* ── RIGHT: Hero athlete image ── */}
-        <div style={{
-          position: 'relative',
-          zIndex: 1,
-          overflow: 'hidden',
-        }}>
-          {/* Dark gradient fade on left edge to blend with text side */}
+        {/* ── RIGHT: Athlete image ── */}
+        <div style={{ position: 'relative', zIndex: 1, overflow: 'hidden' }}>
+          {/* Gradient overlays */}
           <div style={{
-            position: 'absolute',
-            inset: 0,
-            background: 'linear-gradient(90deg, #080808 0%, transparent 30%, transparent 70%, #080808 100%)',
-            zIndex: 2,
-            pointerEvents: 'none',
+            position: 'absolute', inset: 0, zIndex: 2, pointerEvents: 'none',
+            background: 'linear-gradient(90deg, #060608 0%, transparent 30%, transparent 70%, #060608 100%)',
           }} />
-          {/* Bottom fade */}
           <div style={{
-            position: 'absolute',
-            bottom: 0, left: 0, right: 0,
-            height: '30%',
-            background: 'linear-gradient(to top, #080808, transparent)',
-            zIndex: 2,
-            pointerEvents: 'none',
+            position: 'absolute', bottom: 0, left: 0, right: 0, height: '35%', zIndex: 2, pointerEvents: 'none',
+            background: 'linear-gradient(to top, #060608, transparent)',
           }} />
-          {/* Top fade */}
           <div style={{
-            position: 'absolute',
-            top: 0, left: 0, right: 0,
-            height: '15%',
-            background: 'linear-gradient(to bottom, #080808, transparent)',
-            zIndex: 2,
-            pointerEvents: 'none',
+            position: 'absolute', top: 0, left: 0, right: 0, height: '15%', zIndex: 2, pointerEvents: 'none',
+            background: 'linear-gradient(to bottom, #060608, transparent)',
+          }} />
+          {/* Fire tint overlay */}
+          <div style={{
+            position: 'absolute', inset: 0, zIndex: 2, pointerEvents: 'none',
+            background: 'radial-gradient(ellipse 80% 80% at 50% 40%, rgba(255,107,53,0.06) 0%, transparent 60%)',
           }} />
           <motion.img
             src="/hero.png"
-            alt="Fitzer athlete weight lifting"
-            initial={{ opacity: 0, scale: 1.05 }}
+            alt="Fitzer athlete"
+            initial={{ opacity: 0, scale: 1.06 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 1.2, ease: 'easeOut' }}
+            transition={{ duration: 1.4, ease: 'easeOut' }}
             style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
-              objectPosition: 'center top',
+              width: '100%', height: '100%',
+              objectFit: 'cover', objectPosition: 'center top',
               display: 'block',
-              filter: 'brightness(0.85) contrast(1.1) saturate(0.9)',
+              filter: 'brightness(0.8) contrast(1.15) saturate(0.85)',
             }}
           />
         </div>
 
-        {/* Mobile responsive override */}
         <style>{`
           @media (max-width: 768px) {
-            #home {
-              grid-template-columns: 1fr !important;
-            }
-            #home > div:last-child {
-              display: none !important;
-            }
+            #home { grid-template-columns: 1fr !important; }
+            #home > div:last-child { display: none !important; }
           }
         `}</style>
       </section>
 
-      {/* ── What You Get ── */}
+      {/* ── Features ── */}
       <section style={{ background: 'var(--bg2)', padding: '0' }}>
         <div className="cn-content">
-          <Kicker num="01" label="What You Get" />
-          <h2 className="cn-section-title">Everything you need to perform.</h2>
-          <p className="cn-section-body" style={{ marginBottom: '2.5rem' }}>
-            Fitzer combines science-backed training, budget-friendly nutrition, and AI coaching into one seamless experience.
+          <Kicker num="01" label="Platform Features" />
+          <h2 className="cn-section-title" style={{ marginBottom: '0.75rem' }}>
+            Everything you need to{' '}
+            <span style={{
+              background: 'var(--grad-text)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+            }}>perform.</span>
+          </h2>
+          <p className="cn-section-body" style={{ marginBottom: '2.5rem', maxWidth: 560 }}>
+            Science-backed training, budget-friendly nutrition, and AI coaching — in one seamless experience.
           </p>
 
           <div className="cn-grid-3" style={{ gap: '1rem' }}>
@@ -163,27 +184,30 @@ export default function Home() {
               <FeatureCard
                 icon={<Dumbbell size={22} />}
                 title="Smart Exercises"
-                desc="Personalized workout recommendations based on your BMI, body composition, sleep patterns, and fitness goals."
+                desc="Personalized workout plans based on your BMI, body composition, sleep patterns, and goals. Powered by pose-detection AI."
                 href="#/exercise"
                 num="01"
+                color="var(--accent)"
               />
             </ScrollReveal>
-            <ScrollReveal delay={120}>
+            <ScrollReveal delay={100}>
               <FeatureCard
                 icon={<Apple size={22} />}
                 title="Budget Diet Plans"
-                desc="Vegan and non-vegan meal plans engineered around your budget, caloric needs, and nutritional targets."
+                desc="Vegan and non-vegan meal plans tailored to your budget, calories, and nutritional targets with Indian pricing."
                 href="#/diet"
                 num="02"
+                color="var(--accent-amber)"
               />
             </ScrollReveal>
-            <ScrollReveal delay={240}>
+            <ScrollReveal delay={200}>
               <FeatureCard
                 icon={<Brain size={22} />}
-                title="GigaChat AI Coach"
-                desc="An always-on AI fitness assistant trained to answer all your workout, nutrition, and recovery questions."
+                title="GigaChat AI"
+                desc="An always-on AI fitness assistant that answers your workout, nutrition, and recovery questions in real-time."
                 href="#/assistant"
                 num="03"
+                color="var(--accent-red)"
               />
             </ScrollReveal>
           </div>
@@ -194,29 +218,63 @@ export default function Home() {
       <section>
         <div className="cn-content">
           <Kicker num="02" label="How It Works" />
-          <h2 className="cn-section-title">Three steps to transformation.</h2>
-          <div className="cn-section-body">
-            <p>Start by filling in your body specs — height, weight, age, and fitness goal. Fitzer calculates your BMI and generates personalized recommendations across both the Exercise and Diet modules.</p>
-            <p>Then fire up the AI Coach for real-time guidance, motivation, and answers to any fitness question. All data is saved locally so your journey persists across sessions.</p>
-          </div>
+          <h2 className="cn-section-title" style={{ marginBottom: '0.75rem' }}>
+            Three steps to{' '}
+            <span style={{
+              background: 'var(--grad-text)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+            }}>transformation.</span>
+          </h2>
+          <p className="cn-section-body" style={{ marginBottom: '2.5rem', maxWidth: 540 }}>
+            Fill in your body specs, get personalized recommendations, then let the AI Coach guide you every step of the way.
+          </p>
 
-          <div className="cn-divider" style={{ margin: '2.5rem 0' }} />
+          <div className="cn-divider" />
 
-          <div className="cn-grid-4" style={{ gap: '1rem' }}>
+          <div className="cn-grid-4" style={{ gap: '1rem', marginTop: '2rem' }}>
             {[
-              { step: '1', label: 'Enter Your Specs', desc: 'Height, weight, age, sleep, and goals' },
-              { step: '2', label: 'Get Exercises', desc: 'Tailored workout plans for your level' },
-              { step: '3', label: 'Plan Your Diet', desc: 'Budget-friendly meals for your targets' },
-              { step: '4', label: 'Chat with AI', desc: 'Personalized coaching anytime' },
+              { step: '01', label: 'Enter Your Specs', desc: 'Height, weight, age, sleep, and goals', icon: <Target size={18} /> },
+              { step: '02', label: 'Get Exercises', desc: 'Tailored workout plans for your level', icon: <Dumbbell size={18} /> },
+              { step: '03', label: 'Plan Your Diet', desc: 'Budget-friendly meals for your targets', icon: <Apple size={18} /> },
+              { step: '04', label: 'Chat with AI', desc: 'Personalized coaching, anytime', icon: <Bot size={18} /> },
             ].map((s, i) => (
-              <ScrollReveal key={s.step} delay={i * 80}>
-                <div className="cn-card">
-                  <span style={{ fontFamily: 'Anton, sans-serif', fontSize: '2.5rem', color: 'var(--accent)', opacity: 0.35, lineHeight: 1 }}>{s.step}</span>
-                  <p className="cn-h3" style={{ marginTop: '0.5rem', marginBottom: '0.4rem' }}>{s.label}</p>
+              <ScrollReveal key={s.step} delay={i * 70}>
+                <div className="cn-card" style={{ height: '100%' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                    <span style={{
+                      fontFamily: "'Outfit', sans-serif",
+                      fontSize: '2.5rem', fontWeight: 900,
+                      background: 'var(--grad-text)',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                      backgroundClip: 'text',
+                      opacity: 0.4, lineHeight: 1
+                    }}>{s.step}</span>
+                    <span style={{ color: 'var(--accent)', opacity: 0.7 }}>{s.icon}</span>
+                  </div>
+                  <p className="cn-h3" style={{ marginBottom: '0.4rem' }}>{s.label}</p>
                   <p style={{ fontSize: '0.8rem', color: 'var(--text3)' }}>{s.desc}</p>
                 </div>
               </ScrollReveal>
             ))}
+          </div>
+
+          {/* CTA row */}
+          <div style={{
+            marginTop: '3rem', display: 'flex', gap: '0.75rem',
+            justifyContent: 'center', flexWrap: 'wrap'
+          }}>
+            <a href="#/exercise" className="cn-btn" style={{ textDecoration: 'none' }}>
+              <Flame size={16} />
+              Start Your Journey
+              <ArrowRight size={15} />
+            </a>
+            <a href="#/profile" className="cn-btn-ghost" style={{ textDecoration: 'none' }}>
+              <TrendingUp size={16} />
+              View Your Profile
+            </a>
           </div>
         </div>
       </section>
@@ -224,65 +282,94 @@ export default function Home() {
   );
 }
 
-function FeatureCard({ icon, title, desc, href, num }) {
+/* ── Feature Card ── */
+function FeatureCard({ icon, title, desc, href, num, color }) {
   return (
-    <a href={href} className="cn-card" style={{ textDecoration: 'none', display: 'block', height: '100%' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '1rem', color: 'var(--accent)' }}>
-        {icon}
-        <span style={{ fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.1em', color: 'var(--text3)', marginLeft: 'auto' }}>{num}</span>
+    <a
+      href={href}
+      className="cn-glow-card"
+      style={{
+        textDecoration: 'none',
+        display: 'block',
+        height: '100%',
+        padding: '1.75rem',
+        position: 'relative',
+        overflow: 'hidden',
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
+      }}
+    >
+      {/* Glow spot in corner */}
+      <div style={{
+        position: 'absolute', top: 0, right: 0,
+        width: 140, height: 140,
+        background: `radial-gradient(circle, ${color}22 0%, transparent 70%)`,
+        pointerEvents: 'none',
+      }} />
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
+        <div style={{
+          width: 44, height: 44, borderRadius: 12,
+          background: `${color}18`, border: `1px solid ${color}35`,
+          display: 'grid', placeItems: 'center', color
+        }}>
+          {icon}
+        </div>
+        <span style={{ fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.12em', color: 'var(--text3)', fontFamily: "'Outfit', monospace" }}>{num}</span>
       </div>
-      <h3 className="cn-h3" style={{ marginBottom: '0.6rem' }}>{title}</h3>
-      <p style={{ fontSize: '0.82rem', color: 'var(--text2)', lineHeight: 1.65 }}>{desc}</p>
+      <h3 className="cn-h3" style={{ marginBottom: '0.6rem', color: 'var(--text)' }}>{title}</h3>
+      <p style={{ fontSize: '0.85rem', color: 'var(--text2)', lineHeight: 1.65 }}>{desc}</p>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginTop: '1.5rem', color, fontSize: '0.82rem', fontWeight: 700, letterSpacing: '0.02em' }}>
+        Launch Module <ArrowRight size={14} />
+      </div>
     </a>
   );
 }
 
-function StatCounter({ to, suffix, label }) {
+/* ── Animated Fire Stat Counter ── */
+function FireStat({ to, suffix, label }) {
   const ref = React.useRef(null);
   const [count, setCount] = React.useState(0);
-  const [hasStarted, setHasStarted] = React.useState(false);
+  const [started, setStarted] = React.useState(false);
 
   React.useEffect(() => {
     const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && !hasStarted) {
-          setHasStarted(true);
-          observer.disconnect();
-        }
-      },
+      ([e]) => { if (e.isIntersecting && !started) { setStarted(true); observer.disconnect(); } },
       { threshold: 0.5 }
     );
     if (ref.current) observer.observe(ref.current);
     return () => observer.disconnect();
-  }, [hasStarted]);
+  }, [started]);
 
   React.useEffect(() => {
-    if (!hasStarted) return;
-    let start = null;
+    if (!started) return;
     let reqId;
-    const duration = 1800;
-    
-    const easeOut = (t) => 1 - Math.pow(1 - t, 3);
-
-    const step = (timestamp) => {
-      if (!start) start = timestamp;
-      const progress = Math.min((timestamp - start) / duration, 1);
-      
-      setCount(Math.floor(easeOut(progress) * to));
-      
-      if (progress < 1) {
-        reqId = requestAnimationFrame(step);
-      }
+    let start = null;
+    const dur = 1800;
+    const ease = t => 1 - Math.pow(1 - t, 3);
+    const step = ts => {
+      if (!start) start = ts;
+      const p = Math.min((ts - start) / dur, 1);
+      setCount(Math.floor(ease(p) * to));
+      if (p < 1) reqId = requestAnimationFrame(step);
     };
     reqId = requestAnimationFrame(step);
-    
     return () => cancelAnimationFrame(reqId);
-  }, [hasStarted, to]);
+  }, [started, to]);
 
   return (
-    <div className="cn-stat" ref={ref}>
-      <span className="cn-stat-val">{count}{suffix}</span>
-      <span className="cn-stat-label">{label}</span>
+    <div ref={ref} style={{ display: 'flex', flexDirection: 'column', gap: '0.1rem' }}>
+      <span style={{
+        fontFamily: "'Outfit', sans-serif", fontSize: '2rem', fontWeight: 900, lineHeight: 1,
+        background: 'var(--grad-text)',
+        WebkitBackgroundClip: 'text',
+        WebkitTextFillColor: 'transparent',
+        backgroundClip: 'text',
+      }}>
+        {count}{suffix}
+      </span>
+      <span style={{ fontSize: '0.7rem', color: 'var(--text3)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+        {label}
+      </span>
     </div>
   );
 }

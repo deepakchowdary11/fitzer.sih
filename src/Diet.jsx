@@ -163,9 +163,81 @@ function BudgetDietModule() {
 
   const generateBudgetDiet = async () => {
     setIsLoading(true);
+    const baseCalories = calculateCalorieNeeds(bmiData);
+    const proteinNeeds = calculateProteinNeeds(bmiData);
+    const budgetCap = budgetRanges[budgetRange]?.max || 500;
+    const apiKey = import.meta.env.VITE_GROQ_API_KEY || import.meta.env.GROQ_API_KEY || "";
+
+    if (apiKey) {
+      try {
+        const systemPrompt = `You are an expert sports nutritionist specializing in affordable, Indian-market fitness meal plans.
+Generate a structured, personalized budget diet plan for a user with the following profile:
+- Age: ${bmiData.age}
+- Gender: ${bmiData.gender}
+- Goal: ${bmiData.fitnessGoal.replace('_', ' ')}
+- Body Fat: ${bmiData.bodyFatPercentage}%
+- Sleep: ${bmiData.sleepHours} hours
+- Diet Preference: ${dietType.toUpperCase()}
+- Budget Tier: ${budgetRange.toUpperCase()} (Target Max: ₹${budgetCap}/day)
+- Target Daily Calories: ~${baseCalories} kcal
+- Target Daily Protein: ~${proteinNeeds}g
+
+Format the output EXACTLY using these clean sections without markdown asterisks, bullet points or hashes:
+
+PERSONAL PROFILE
+Age: ${bmiData.age} years | Gender: ${bmiData.gender}
+Body Fat: ${bmiData.bodyFatPercentage}% | Sleep: ${bmiData.sleepHours} hours
+Fitness Goal: ${bmiData.fitnessGoal.replace('_', ' ').toUpperCase()}
+Diet Type: ${dietType.toUpperCase()}
+Daily Calories: ${baseCalories} kcal | Protein: ${proteinNeeds}g
+
+MEAL PLAN
+Breakfast: [Specific delicious meal with portion and protein]
+Morning Snack: [Healthy budget snack]
+Lunch: [Balanced meal with carbs, protein, and vegetables]
+Afternoon Snack: [Energy / protein booster]
+Dinner: [Nutritious, easy to digest dinner]
+Hydration: ${calculateWaterNeeds(bmiData)} glasses of water per day
+
+COST SUMMARY
+Daily Total: ₹[Realistic estimated total cost under ₹${budgetCap}]
+Budget Tip: [One high-impact budget shopping or prep tip]
+
+SHOPPING LIST
+[Comma-separated essential items for the week]`;
+
+        const resp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`
+          },
+          body: JSON.stringify({
+            model: 'llama-3.3-70b-versatile',
+            messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: 'Generate my personalized budget diet plan.' }],
+            temperature: 0.6,
+            max_tokens: 650,
+            stream: false
+          })
+        });
+
+        if (resp.ok) {
+          const data = await resp.json();
+          const content = data.choices?.[0]?.message?.content?.trim();
+          if (content) {
+            const lines = content.split('\n').map(l => l.replace(/^[#*•-]\s*/, '').trim());
+            setDietPlan(lines);
+            setIsLoading(false);
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn('Groq API diet fetch failed, falling back to local generator:', err);
+      }
+    }
+
+    // Fallback if API unavailable
     try {
-      const baseCalories = calculateCalorieNeeds(bmiData);
-      const proteinNeeds = calculateProteinNeeds(bmiData);
       const mealPlans = generateBudgetMealPlans(budgetRange, baseCalories, proteinNeeds, bmiData.fitnessGoal, dietType);
       setDietPlan([
         `PERSONAL PROFILE`,
@@ -206,52 +278,56 @@ function BudgetDietModule() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
       {/* Budget + Diet type selection */}
-      <div className="cn-card">
-        <h2 className="cn-h2" style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <DollarSign size={18} style={{ color: 'var(--accent)' }} />
-          Choose Your Budget Range
+      <div className="cn-glow-card" style={{ padding: '2rem' }}>
+        <h2 className="cn-h2" style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+          <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(255,107,53,0.15)', border: '1px solid rgba(255,107,53,0.3)', display: 'grid', placeItems: 'center', color: 'var(--accent)' }}>
+            <DollarSign size={20} />
+          </div>
+          Target Daily Budget
         </h2>
 
-        <div className="cn-grid-3" style={{ marginBottom: '1.5rem' }}>
+        <div className="cn-grid-3" style={{ marginBottom: '1.5rem', gap: '1rem' }}>
           {Object.entries(budgetRanges).map(([key, range]) => (
             <button
               key={key}
               onClick={() => setBudgetRange(key)}
               style={{
-                padding: '1rem',
-                borderRadius: 12,
+                padding: '1.25rem',
+                borderRadius: 14,
                 textAlign: 'left',
-                border: budgetRange === key ? '1px solid var(--accent)' : '1px solid var(--border)',
-                background: budgetRange === key ? 'var(--accent3)' : 'rgba(255,255,255,0.02)',
-                color: budgetRange === key ? 'var(--accent)' : 'var(--text2)',
+                border: budgetRange === key ? '1.5px solid var(--accent)' : '1px solid var(--border)',
+                background: budgetRange === key ? 'var(--accent2)' : 'rgba(255,255,255,0.02)',
+                color: budgetRange === key ? 'var(--text)' : 'var(--text2)',
+                boxShadow: budgetRange === key ? '0 4px 20px rgba(255,107,53,0.18)' : 'none',
                 cursor: 'pointer',
-                transition: 'all 0.2s',
+                transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
                 fontFamily: 'inherit',
               }}
             >
-              <div style={{ fontWeight: 700, marginBottom: '0.25rem' }}>{range.label}</div>
-              <div style={{ fontSize: '0.8rem', opacity: 0.7 }}>Up to ₹{range.max}/day</div>
+              <div style={{ fontWeight: 800, fontSize: '1.05rem', color: budgetRange === key ? 'var(--accent)' : 'var(--text)', marginBottom: '0.35rem' }}>{range.label}</div>
+              <div style={{ fontSize: '0.82rem', color: 'var(--text3)' }}>Up to ₹{range.max} / day</div>
             </button>
           ))}
         </div>
 
-        <div style={{ marginBottom: '1.5rem' }}>
+        <div style={{ marginBottom: '2rem' }}>
           <label className="cn-label" style={{ marginBottom: '0.75rem', display: 'block' }}>Diet Preference</label>
           <div style={{ display: 'flex', gap: '0.75rem' }}>
-            {[['vegan', 'Vegan'], ['non-vegan', 'Non-Vegan']].map(([val, label]) => (
+            {[['vegan', 'Vegan / Plant-Based'], ['non-vegan', 'Non-Vegan / High Protein']].map(([val, label]) => (
               <button
                 key={val}
                 onClick={() => setDietType(val)}
                 style={{
-                  padding: '0.65rem 1.4rem',
+                  padding: '0.75rem 1.5rem',
                   borderRadius: 10,
                   fontFamily: 'inherit',
-                  fontWeight: 600,
+                  fontWeight: 700,
                   fontSize: '0.85rem',
                   cursor: 'pointer',
-                  border: dietType === val ? '1px solid var(--accent)' : '1px solid var(--border)',
-                  background: dietType === val ? 'var(--accent2)' : 'transparent',
+                  border: dietType === val ? '1.5px solid var(--accent)' : '1px solid var(--border)',
+                  background: dietType === val ? 'var(--accent2)' : 'rgba(255,255,255,0.02)',
                   color: dietType === val ? 'var(--accent)' : 'var(--text2)',
+                  boxShadow: dietType === val ? '0 4px 16px rgba(255,107,53,0.15)' : 'none',
                   transition: 'all 0.2s',
                 }}
               >
@@ -261,8 +337,9 @@ function BudgetDietModule() {
           </div>
         </div>
 
-        <button className="cn-btn" onClick={generateBudgetDiet} disabled={isLoading}>
-          {isLoading ? 'Generating...' : 'Generate Budget Diet Plan'}
+        <button className="cn-btn" onClick={generateBudgetDiet} disabled={isLoading} style={{ width: '100%', justifyContent: 'center', padding: '0.9rem' }}>
+          <Zap size={16} />
+          {isLoading ? 'Computing Precision Diet Plan...' : 'Generate Personalized Diet Plan'}
         </button>
       </div>
 
@@ -289,7 +366,7 @@ function BudgetDietModule() {
                     padding: '0.65rem 1rem',
                     borderRadius: 8,
                     fontSize: '0.85rem',
-                    background: isHeader ? 'rgba(200,240,74,0.06)' : 'rgba(255,255,255,0.02)',
+                    background: isHeader ? 'rgba(255,107,53,0.06)' : 'rgba(255,255,255,0.02)',
                     borderLeft: isHeader ? '3px solid var(--accent)' : '1px solid var(--border2)',
                     color: isHeader ? 'var(--text)' : isCost ? 'var(--accent)' : isSubHeader ? 'var(--text)' : 'var(--text2)',
                     fontWeight: isHeader ? 700 : isSubHeader ? 600 : 400,
