@@ -1,10 +1,7 @@
 import cv2
 import mediapipe as mp
 import numpy as np
-import tkinter as tk
-from tkinter import ttk
 import threading
-import pyttsx3
 import time
 from collections import deque, defaultdict
 
@@ -1101,6 +1098,9 @@ def recommend_exercise(bmi):
 # Only launch the Tkinter GUI when running this file directly (not when
 # imported by the FastAPI backend).
 if __name__ == "__main__":
+    import tkinter as tk
+    from tkinter import ttk
+
     root = tk.Tk()
     root.title("AI Fitness Assistant")
     root.geometry("460x480")
