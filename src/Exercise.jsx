@@ -1363,9 +1363,14 @@ function AITrainingView({ exercise, backendName, streamRef, wsRef, frameTimerRef
       }
 
       // ── 2. Open WebSocket ─────────────────────────────────────────────────
+      // Use VITE_POSTURE_WS_URL for production (e.g. Render deployment).
+      // Falls back to localhost for local development.
+      const WS_URL =
+        import.meta.env.VITE_POSTURE_WS_URL ||
+        'ws://localhost:8000/ws/pose';
       let ws;
       try {
-        ws = new WebSocket('ws://localhost:8000/ws/pose');
+        ws = new WebSocket(WS_URL);
       } catch (_) {
         if (!cancelled) {
           setWsStatus('error');
