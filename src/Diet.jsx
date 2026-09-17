@@ -213,7 +213,7 @@ SHOPPING LIST
             'Authorization': `Bearer ${apiKey}`
           },
           body: JSON.stringify({
-            model: 'llama-3.3-70b-versatile',
+            model: 'qwen/qwen3.8-27b',
             messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: 'Generate my personalized budget diet plan.' }],
             temperature: 0.6,
             max_tokens: 650,

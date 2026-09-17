@@ -247,7 +247,7 @@ Every question must have between 3 to 4 clear, compelling options with relevant 
         'Authorization': `Bearer ${GROQ_API_KEY}`
       },
       body: JSON.stringify({
-        model: 'llama-3.3-70b-versatile',
+        model: 'qwen/qwen3.8-27b',
         messages: [
           { role: 'system', content: 'You output only strict JSON arrays of question objects.' },
           { role: 'user', content: prompt }

@@ -101,7 +101,7 @@ IMPORTANT FORMATTING RULES:
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
         body: JSON.stringify({
-          model: 'llama-3.3-70b-versatile',
+          model: 'qwen/qwen3.8-27b',
           messages: [{ role: 'system', content: systemPrompt }, ...conversationHistory, { role: 'user', content: trimmed }],
           temperature: 0.7,
           max_tokens: 600,
