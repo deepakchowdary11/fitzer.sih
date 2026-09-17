@@ -21,3 +21,11 @@ yarn-error.log*
 .idea/
 .DS_Store
 Thumbs.db
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+
