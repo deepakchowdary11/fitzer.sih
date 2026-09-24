@@ -1,5 +1,5 @@
-# -----------------------------------------------------------------------
-# Posture Corrector – Python backend dependencies
+﻿# -----------------------------------------------------------------------
+# Posture Corrector - Python backend dependencies
 # -----------------------------------------------------------------------
 
 # Web framework & WebSocket transport
