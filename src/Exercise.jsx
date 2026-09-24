@@ -1374,7 +1374,7 @@ function AITrainingView({ exercise, backendName, streamRef, wsRef, frameTimerRef
       } catch (_) {
         if (!cancelled) {
           setWsStatus('error');
-          setMetrics(m => ({ ...m, feedback: 'Posture AI backend is not connected. Start the FastAPI server on port 8000.' }));
+          setMetrics(m => ({ ...m, feedback: 'Posture AI backend is unavailable. Please check your connection and try again.' }));
         }
         return;
       }
@@ -1443,7 +1443,7 @@ function AITrainingView({ exercise, backendName, streamRef, wsRef, frameTimerRef
       ws.onerror = () => {
         if (!cancelled) {
           setWsStatus('error');
-          setMetrics(m => ({ ...m, feedback: 'Posture AI backend is not connected. Start the FastAPI server on port 8000.' }));
+          setMetrics(m => ({ ...m, feedback: 'Posture AI backend is unavailable. Please check your connection and try again.' }));
         }
       };
       ws.onclose = () => {
